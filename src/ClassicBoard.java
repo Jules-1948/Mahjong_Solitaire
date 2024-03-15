@@ -56,6 +56,19 @@ public class ClassicBoard {
 
     }
 
+    public void isExposed(){
+        
+    }
+
+    public void removeTile(){
+
+    }
+
+    // getter for existentTileCount
+    public int getExistentTileCount(){
+        return existentTileCount;
+    }
+
     @Override
     public String toString(){
         String boardString = "Listed bottom layer to top:";
@@ -78,25 +91,38 @@ public class ClassicBoard {
         return boardString;
     }
 
-    // getter for existentTileCount
-    public int getExistentTileCount(){
-        return existentTileCount;
-    }
+
+
+
+
+
+
+    //Below are all helper functions to create the board instance
+
+
 
     // Creates a new tile and stores it in a valid location on the board
     private void createNewTile(int[] location, int suit, int face){
+        int x = location[0];
+        int y = location[1];
+        int z = location[2];
+
         // Return if not a valid location
         if(location.length != 3){
             System.err.println("Invalid location in list. Tile not created.");
             return;
-        } else if (location[0] >= boardX || location[1] >= boardY || location[2] >= boardZ){
+        } else if (x >= boardX || y >= boardY || z >= boardZ){
             System.err.println("Tile location out of bounds. Tile not created.");
             return;
         }
 
-        // Create Tile and place in board
-        Tile newTile = new Tile(location[0], location[1], suit, face);
-        board[location[0]][location[1]][location[2]] = newTile;
+        // Create Tile and place in all 4 board coordinates
+        Tile newTile = new Tile(x, y, suit, face);
+        board[x][y][z] = newTile;
+        board[x+1][y][z] = newTile;
+        board[x][y+1][z] = newTile;
+        board[x+1][y+1][z] = newTile;
+
         existentTileCount++;
     }
 

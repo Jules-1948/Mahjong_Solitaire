@@ -7,6 +7,7 @@ public class Tile {
 
     // colors for making the toString method more readable
     private final String[] suitColors = {"\u001B[41m", "\u001B[44m", "\u001B[42m", "\u001B[46m", "\u001B[45m", "\u001B[47m", "\u001B[43m"};
+                //characters = red, circles = blue, bamboos = green, winds = cyan, dragons = magenta, seasons = white, flowers = yellow 
     private final String resetColor = "\u001B[0m";
 
 
