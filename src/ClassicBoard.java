@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -18,7 +19,8 @@ public class ClassicBoard {
     final private int[] multiplesOfSuit = {4, 4, 4, 4, 4, 1, 1}; // how many multiples of each suit
     private int[] suitCounts; // number of tiles for each suit remaining to be created
     private int[][] faceCounts; // number of faces within each suit remaining to be created
-    private int[][] classicBoardTileSpaces; //array of 3D locations for tiles(left corner only)
+    private int[][] classicBoardTileSpaces; // array of 3D locations for tiles(left corner only)
+    private ArrayList<Tile> tiles; // arrayList of all tiles currently in game
     
     public ClassicBoard(long seed){
         // Initialize all values according to static rules, tile counts, suit counts, and board layout of the game
@@ -29,6 +31,7 @@ public class ClassicBoard {
         suitNum = 7;
         existentTileCount = 0;
         classicBoardTileSpaces = new int[144][3];
+        tiles = new ArrayList<>();
 
         suitCounts = new int[suitNum];
         for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
@@ -51,17 +54,61 @@ public class ClassicBoard {
             int face = getNextFace(suit, rand);
             createNewTile(location, suit, face);
         }
-
-        System.out.println(toString());
-
     }
 
-    public void isExposed(){
+    // returns whether given tile is an exposed(playable) tile
+    public boolean isExposed(Tile tile){
+        int x = tile.getTopLeftX();
+        int y = tile.getTopLeftY();
+        int z = tile.getZLayer();
+
+        int sideExposed = 0;
+        boolean sides = false;
+        Boolean above = false;
+
+        // check if vertically exposed
+        if(z+1 < boardZ){
+            if(y+1 < boardY && board[x][y][z+1] == null && board[x+1][y][z+1] == null && board[x][y+1][z+1] == null && board[x+1][y+1][z+1] == null){
+                above = true;
+            }
+        } else {above = true;}
+
+        // check if horizontally exposed
+        if(x-1 >= 0){
+            if(board[x-1][y][z] == null){sideExposed++;} //top left
+            if(y+1 >= 0){
+                if(board[x-1][y+1][z] == null){sideExposed++;} //bottom left
+            }
+        } else if(x == 0){sideExposed = 2;}
+        if(sideExposed == 2){sides = true;}
+
+        sideExposed = 0; //both exposed results must be on the same side
+        if(x+2 < boardX){
+            if(board[x+2][y][z] == null){sideExposed++;} //top right
+            if(y+1 < boardY){
+                if(board[x+2][y+1][z] == null){sideExposed++;} //bottom right
+            }
+        } else if(x+2 == boardX){sideExposed = 2;}
+        if(sideExposed == 2){sides = true;}
         
+        // Must have all four above exposed as well as both sides on at least one side
+        return sides && above;
     }
 
-    public void removeTile(){
+    // removes tile from board if exposed
+    public boolean removeTiles(Tile tile1, Tile tile2){
+        // tiles are not exposed and cannot be removed
+        if(!isExposed(tile1) || !isExposed(tile2)){return false;}
 
+        // check if tiles match
+        if(!tile1.getUniqueString().equals(tile2.getUniqueString())){
+            return false;
+        }
+
+        setBoardNull(tile1);
+        setBoardNull(tile2);
+
+        return true;
     }
 
     // getter for existentTileCount
@@ -69,19 +116,42 @@ public class ClassicBoard {
         return existentTileCount;
     }
 
+    // getter for all tiles
+    public ArrayList<Tile> getTiles(){
+        return tiles;
+    }
+
+    // returns list of all exposed(playable) tiles
+    public ArrayList<Tile> getExposedTiles(){
+        ArrayList<Tile> exposed = new ArrayList<>();
+
+        for(Tile tile: tiles){
+            if(isExposed(tile)){
+                exposed.add(tile);
+            }
+        }
+
+        return exposed;
+    }
+
+    // prints current game board layer by layer
     @Override
     public String toString(){
-        String boardString = "Listed bottom layer to top:";
+        String boardString = "";
 
         for(int z=0; z<boardZ; z++){
-            boardString = boardString + "\n\nLayer " + z + "\n";
+            boardString = boardString + "\nLayer " + z + "\n";
 
             for(int y=0; y<boardY; y++){
                 for(int x=0; x<boardX; x++){
                     if(board[x][y][z] == null){
                         boardString = boardString + "|N";
                     } else {
-                        boardString = boardString + "|" + board[x][y][z].toString();
+                        if(isExposed(board[x][y][z])){
+                            boardString = boardString + "\u001B[41m" + "|" + "\u001B[0m" + board[x][y][z].toString();
+                        } else{
+                            boardString = boardString + "|" + board[x][y][z].toString();
+                        }
                     }
                 }
                 boardString = boardString + "|\n";
@@ -97,7 +167,7 @@ public class ClassicBoard {
 
 
 
-    //Below are all helper functions to create the board instance
+    //Below are all private helper functions mostly to create the board instance
 
 
 
@@ -117,12 +187,8 @@ public class ClassicBoard {
         }
 
         // Create Tile and place in all 4 board coordinates
-        Tile newTile = new Tile(x, y, suit, face);
-        board[x][y][z] = newTile;
-        board[x+1][y][z] = newTile;
-        board[x][y+1][z] = newTile;
-        board[x+1][y+1][z] = newTile;
-
+        Tile newTile = new Tile(x, y, z, suit, face);
+        setBoardTile(x, y, z, newTile);
         existentTileCount++;
     }
 
@@ -189,5 +255,28 @@ public class ClassicBoard {
                 }
             }
         }
+    }
+
+    private void setBoardTile(int x, int y, int z, Tile tile){
+        board[x][y][z] = tile;
+        board[x+1][y][z] = tile;
+        board[x][y+1][z] = tile;
+        board[x+1][y+1][z] = tile;
+
+        tiles.add(tile);
+    }
+
+    private void setBoardNull(Tile tile){
+        
+        int x = tile.getTopLeftX();
+        int y = tile.getTopLeftY();
+        int z = tile.getZLayer();
+
+        board[x][y][z] = null;
+        board[x+1][y][z] = null;
+        board[x][y+1][z] = null;
+        board[x+1][y+1][z] = null;
+
+        tiles.remove(tile);
     }
 }

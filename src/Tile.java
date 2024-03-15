@@ -2,6 +2,7 @@ public class Tile {
     private String[] suits = {"characters", "circles", "bamboos", "winds", "dragons", "seasons", "flowers"};
     private int topLeftX;
     private int topLeftY;
+    private int zLayer;
     private int suit;
     private int face;
 
@@ -11,9 +12,10 @@ public class Tile {
     private final String resetColor = "\u001B[0m";
 
 
-    public Tile(int leftX, int leftY, int suit, int face){
+    public Tile(int leftX, int leftY, int zLayer, int suit, int face){
         topLeftX = leftX;
         topLeftY = leftY;
+        this.zLayer = zLayer;
         this.suit = suit;
         this.face = face;
     }
@@ -23,12 +25,35 @@ public class Tile {
         return suitColors[suit] + face + resetColor;
     }
 
+    public String toString(boolean indices){
+        if(indices){
+            return "(" + topLeftX + ", " + topLeftY + ", " + zLayer + ") " + face + " of " + suit + " aka " + suits[suit];
+        } else {
+            return "  " + face + " of " + suit + " aka " + suits[suit];
+        }
+    }
+
+    // Only use this function within board classes
+    public String getUniqueString(){
+        // return single matching id for all seasons and flowers tiles for 
+        // the rule that they can all be intermatched
+        if(suit == 5 || suit == 6){
+            return "Cinderella";
+        }
+
+        return face + " of " + suit;
+    }
+
     public int getTopLeftX() {
         return topLeftX;
     }
 
     public int getTopLeftY() {
         return topLeftY;
+    }
+
+    public int getZLayer(){
+        return zLayer;
     }
 
     public int getSuit() {
