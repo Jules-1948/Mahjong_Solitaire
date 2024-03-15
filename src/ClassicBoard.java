@@ -105,6 +105,7 @@ public class ClassicBoard {
             return false;
         }
 
+        System.out.println("removing");
         setBoardNull(tile1);
         setBoardNull(tile2);
 
