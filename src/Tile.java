@@ -11,6 +11,13 @@ public class Tile {
                 //characters = red, circles = blue, bamboos = green, winds = cyan, dragons = magenta, seasons = white, flowers = yellow 
     private final String resetColor = "\u001B[0m";
 
+    private Tile(Tile parentTile) {
+        topLeftX = parentTile.topLeftX;
+        topLeftY = parentTile.topLeftY;
+        zLayer = parentTile.zLayer;
+        suit = parentTile.suit;
+        face = parentTile.face;
+    }
 
     public Tile(int leftX, int leftY, int zLayer, int suit, int face){
         topLeftX = leftX;
@@ -62,5 +69,9 @@ public class Tile {
 
     public int getFace() {
         return face;
+    }
+
+    public Tile deepCopy() {
+        return new Tile(this);
     }
 }

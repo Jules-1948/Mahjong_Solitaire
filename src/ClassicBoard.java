@@ -22,6 +22,18 @@ public class ClassicBoard {
     private int[][] classicBoardTileSpaces; // array of 3D locations for tiles(left corner only)
     private ArrayList<Tile> tiles; // arrayList of all tiles currently in game
     
+    //Used for deep copying of board
+    private ClassicBoard(ClassicBoard parentBoard) {
+        boardX = parentBoard.boardX;
+        boardY = parentBoard.boardY;
+        boardZ = parentBoard.boardZ;
+        board = new Tile[boardX][boardY][boardZ];
+
+        Tile[][][] tileBoard = parentBoard.board;
+        initializeNullBoard();
+        //Should set all the boards?
+    }
+
     public ClassicBoard(long seed){
         // Initialize all values according to static rules, tile counts, suit counts, and board layout of the game
         boardX = 30;
@@ -55,6 +67,7 @@ public class ClassicBoard {
             createNewTile(location, suit, face);
         }
     }
+
 
     // returns whether given tile is an exposed(playable) tile
     public boolean isExposed(Tile tile){
@@ -162,7 +175,9 @@ public class ClassicBoard {
         return boardString;
     }
 
-
+    public ClassicBoard deepCopy() {
+        return new ClassicBoard(this);
+    }
 
 
 
