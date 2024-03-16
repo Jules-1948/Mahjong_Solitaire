@@ -1,4 +1,12 @@
+/**
+ * @author Julia Schaming
+ */
 public class AStar {
+
+    // Your solver method or class should have a single verbosity parameter that defaults to showing the final result
+    // only but can be set to another value (or values) to print out more details about the steps the algorithm is taking.
+    // For example, for verbosity=1, my CSP solver might print out every time it tries to assign a value to a variable, and
+    // with verbosity=2, it prints out each domain of the variables in addition.
 
     public void runInstance(){
         ClassicBoard board = new ClassicBoard(543891); //3829432);

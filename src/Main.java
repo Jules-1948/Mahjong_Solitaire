@@ -1,3 +1,6 @@
+/**
+ * @author Tyler James and Julia Schaming
+ */
 public class Main{
 
     public static void main(String[] args) {

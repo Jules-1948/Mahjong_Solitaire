@@ -1,3 +1,6 @@
+/**
+ * @author Julia Schaming
+ */
 public class Tile {
     private String[] suits = {"characters", "circles", "bamboos", "winds", "dragons", "seasons", "flowers"};
     private int topLeftX;
@@ -11,6 +14,7 @@ public class Tile {
                 //characters = red, circles = blue, bamboos = green, winds = cyan, dragons = magenta, seasons = white, flowers = yellow 
     private final String resetColor = "\u001B[0m";
 
+    // Author: Tyler James
     private Tile(Tile parentTile) {
         topLeftX = parentTile.topLeftX;
         topLeftY = parentTile.topLeftY;
@@ -71,6 +75,7 @@ public class Tile {
         return face;
     }
 
+    // Author: Tyler Jamess
     public Tile deepCopy() {
         return new Tile(this);
     }

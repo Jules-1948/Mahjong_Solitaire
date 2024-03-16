@@ -1,3 +1,6 @@
+/**
+ * @author Julia Schaming
+ */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
