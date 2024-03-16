@@ -6,14 +6,15 @@ import java.util.Scanner;
 
 public class ClassicBoard {
     // Board Variables
-    private int boardX; // x dimension of the board
-    private int boardY; // y dimension of the board
-    private int boardZ; // z dimension of the board -- 0 is the bottom layer
+    final private int numDimensions = 3; // width, length, depth -- used only in contructor
+    final private int boardX = 30; // x dimension of the board
+    final private int boardY = 16; // y dimension of the board
+    final private int boardZ = 5; // z dimension of the board -- 0 is the bottom layer
     private Tile[][][] board; // represents actual game board
 
     // Tile Generation Variables
-    private int suitNum; // total number of suits used in the game
-    private int existentTileCount; // number of existant and in play tiles
+    final private int suitNum = 7; // total number of suits used in the game
+    final private int totalTileCount = 144; // total number of tiles in the start of the game
     final private int[] facesPerSuit = {9, 9, 9, 4, 3, 4, 4}; // number of faces in each suit
                         // index num above corresponds with string order of suits in Tile class
     final private int[] multiplesOfSuit = {4, 4, 4, 4, 4, 1, 1}; // how many multiples of each suit
@@ -21,28 +22,43 @@ public class ClassicBoard {
     private int[][] faceCounts; // number of faces within each suit remaining to be created
     private int[][] classicBoardTileSpaces; // array of 3D locations for tiles(left corner only)
     private ArrayList<Tile> tiles; // arrayList of all tiles currently in game
+    private int existentTileCount; // number of existant and in play tiles
+
     
     //Used for deep copying of board
     private ClassicBoard(ClassicBoard parentBoard) {
-        boardX = parentBoard.boardX;
-        boardY = parentBoard.boardY;
-        boardZ = parentBoard.boardZ;
+        existentTileCount = 0;
+        tiles = new ArrayList<>();
+        classicBoardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
         board = new Tile[boardX][boardY][boardZ];
+        for(int z=0; z<boardZ; z++){
+            for(int y=0; y<boardY-1; y++){
+                for(int x=0; x<boardX-1; x++){
+                    if(parentBoard.board[x][y][z] != null && board[x][y][z] == null){
+                        //this method also fills tiles array
+                        setBoardTile(x, y, z, parentBoard.board[x][y][z].deepCopy());
+                    }
+                }
+            }
+        }
 
-        Tile[][][] tileBoard = parentBoard.board;
-        initializeNullBoard();
-        //Should set all the boards?
+
+        suitCounts = new int[suitNum];
+        for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
+
+        faceCounts = new int[suitNum][facesPerSuit[0]];
+        for(int i=0; i<suitNum; i++){ //iterates through suits
+            for(int j=0; j<facesPerSuit[i]; j++){ //iterates through faces
+                faceCounts[i][j] = multiplesOfSuit[i];
+            }
+        }
     }
 
     public ClassicBoard(long seed){
         // Initialize all values according to static rules, tile counts, suit counts, and board layout of the game
-        boardX = 30;
-        boardY = 16;
-        boardZ = 5;
         board = new Tile[boardX][boardY][boardZ];
-        suitNum = 7;
         existentTileCount = 0;
-        classicBoardTileSpaces = new int[144][3];
+        classicBoardTileSpaces = new int[totalTileCount][numDimensions];
         tiles = new ArrayList<>();
 
         suitCounts = new int[suitNum];
@@ -55,8 +71,7 @@ public class ClassicBoard {
             }
         }
 
-        // Prep board with nulls and fetch tile locations from file
-        initializeNullBoard();
+        // Fetch tile locations from file
         initializeTileSpaces();
 
         // Create and place all tiles for board
@@ -67,7 +82,6 @@ public class ClassicBoard {
             createNewTile(location, suit, face);
         }
     }
-
 
     // returns whether given tile is an exposed(playable) tile
     public boolean isExposed(Tile tile){
@@ -112,13 +126,11 @@ public class ClassicBoard {
     public boolean removeTiles(Tile tile1, Tile tile2){
         // tiles are not exposed and cannot be removed
         if(!isExposed(tile1) || !isExposed(tile2)){return false;}
-
+        // check that tiles are not the same instance
+        if(tile1 == tile2){return false;}
         // check if tiles match
-        if(!tile1.getUniqueString().equals(tile2.getUniqueString())){
-            return false;
-        }
+        if(!tile1.getUniqueString().equals(tile2.getUniqueString())){return false;}
 
-        System.out.println("removing");
         setBoardNull(tile1);
         setBoardNull(tile2);
 
@@ -260,17 +272,6 @@ public class ClassicBoard {
             System.err.println("Tile location file not found");
         }
 
-    }
-
-    // initialize board to null values
-    private void initializeNullBoard(){
-        for (int x = 0; x < boardX; x++){
-            for(int y = 0; y < boardY; y++){
-                for(int z = 0; z < boardZ; z++){
-                    board[x][y][z] = null;
-                }
-            }
-        }
     }
 
     private void setBoardTile(int x, int y, int z, Tile tile){
