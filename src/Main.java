@@ -4,12 +4,13 @@
 public class Main{
 
     public static void main(String[] args) {
-        AStar aStar = new AStar();
-        aStar.runClassicInstance(238493280, 2);
+        // AStar aStar = new AStar();
+        // aStar.runClassicInstance(238493280, 2);
 
 
-        BeamStack algorithm2 = new BeamStack();
-        algorithm2.runInstance();
+        Board classicBoard = new Board(238493280, "classic");
+        BeamStack algorithm2 = new BeamStack(1);
+        System.out.println(algorithm2.runInstance(classicBoard, 3).size());
     }
     
 }

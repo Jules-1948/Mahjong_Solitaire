@@ -87,31 +87,35 @@ public class Board {
 
     //Used for deep copying of board
     private Board(Board parentBoard) {
-        boardX = parentBoard.boardX;
-        boardY = parentBoard.boardY;
-        boardZ = parentBoard.boardZ;
-        existentTileCount = parentBoard.getExistentTileCount();
-        tiles = new ArrayList<>();
-        path = new ArrayList<>();
-        boardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
-        boardType = parentBoard.boardType; //also not really used in this constructor
-        board = new Tile[boardX][boardY][boardZ];
+        this.boardX = parentBoard.boardX;
+        this.boardY = parentBoard.boardY;
+        this.boardZ = parentBoard.boardZ;
+        this.existentTileCount = parentBoard.getExistentTileCount();
+        this.tiles = new ArrayList<>();
+        this.path = new ArrayList<>();
+        for(Tile[] tiles : parentBoard.path) {
+            addToPath(tiles[0], tiles[1]);
+        }
+        this.boardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
+        this.boardType = parentBoard.boardType; //also not really used in this constructor
+        this.board = new Tile[boardX][boardY][boardZ];
         for(int z=0; z<boardZ; z++){
             for(int y=0; y<boardY-1; y++){
                 for(int x=0; x<boardX-1; x++){
                     if(parentBoard.board[x][y][z] != null && board[x][y][z] == null){
                         //this method also fills tiles array
-                        setBoardTile(x, y, z, parentBoard.board[x][y][z].deepCopy());
+                        Tile tileCopy = parentBoard.board[x][y][z].deepCopy();
+                        setBoardTile(x, y, z, tileCopy);
                     }
                 }
             }
         }
 
 
-        suitCounts = new int[suitNum];
+        this.suitCounts = new int[suitNum];
         for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
 
-        faceCounts = new int[suitNum][facesPerSuit[0]];
+        this.faceCounts = new int[suitNum][facesPerSuit[0]];
         for(int i=0; i<suitNum; i++){ //iterates through suits
             for(int j=0; j<facesPerSuit[i]; j++){ //iterates through faces
                 faceCounts[i][j] = multiplesOfSuit[i];
@@ -167,7 +171,6 @@ public class Board {
 
     // adds to path and returns it with new tupple appended
     public ArrayList<Tile[]> addToPath(Tile tile1, Tile tile2){
-
         path.add(new Tile[]{tile1, tile2});
 
         return path;
