@@ -27,6 +27,7 @@ public class Board {
     private int[][] boardTileSpaces; // array of 3D locations for tiles(left corner only)
     private ArrayList<Tile> tiles; // arrayList of all tiles currently in game
     private int existentTileCount; // number of existant and in play tiles
+    private ArrayList<Tile[]> path; // contains the order of removed tiles as tuples (each array will be 2 long)
 
 
     /**
@@ -60,6 +61,7 @@ public class Board {
         existentTileCount = 0;
         boardTileSpaces = new int[totalTileCount][numDimensions];
         tiles = new ArrayList<>();
+        path = new ArrayList<>();
 
         suitCounts = new int[suitNum];
         for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
@@ -88,8 +90,9 @@ public class Board {
         boardX = parentBoard.boardX;
         boardY = parentBoard.boardY;
         boardZ = parentBoard.boardZ;
-        existentTileCount = 0;
+        existentTileCount = parentBoard.getExistentTileCount();
         tiles = new ArrayList<>();
+        path = new ArrayList<>();
         boardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
         boardType = parentBoard.boardType; //also not really used in this constructor
         board = new Tile[boardX][boardY][boardZ];
@@ -114,6 +117,60 @@ public class Board {
                 faceCounts[i][j] = multiplesOfSuit[i];
             }
         }
+    }
+
+    // Checks if boards have exact same tiles in same place NOT if boards are the same instance 
+    public boolean areEqualBoards(Board checkAgainst){
+        // For speed's sake, this is a fast check that weeds out most cases
+        if(existentTileCount != checkAgainst.getExistentTileCount()){return false;}
+
+        int sameCount = 0;
+        ArrayList<Tile> tiles1 = tiles;
+        ArrayList<Tile> tiles2 = checkAgainst.getTiles();
+
+        // boards are the same size, so I can do this
+        for(int i=0; i<existentTileCount; i++){
+            if(tiles1.get(i).getUniqueString().equals(tiles2.get(i).getUniqueString())){
+                if(tiles1.get(i).getTopLeftX() == tiles2.get(i).getTopLeftX()){
+                    if(tiles1.get(i).getTopLeftY() == tiles2.get(i).getTopLeftY()){
+                        if(tiles1.get(i).getZLayer() == tiles2.get(i).getZLayer()){
+                            sameCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return sameCount == existentTileCount;
+    }
+
+    public boolean canRemoveTiles(Tile tile1, Tile tile2){
+        // tiles are not exposed and cannot be removed
+        if(!isExposed(tile1) || !isExposed(tile2)){return false;}
+
+        // check that tiles are not the same instance
+        if(tile1 == tile2){return false;}
+        
+        // check if tiles match
+        if(!tile1.getUniqueString().equals(tile2.getUniqueString())){return false;}
+
+        return true;
+    }
+
+    // removes tile from board if exposed
+    public void removeTiles(Tile tile1, Tile tile2){
+        if(canRemoveTiles(tile1, tile2)){
+            setBoardNull(tile1);
+            setBoardNull(tile2);
+        }
+    }
+
+    // adds to path and returns it with new tupple appended
+    public ArrayList<Tile[]> addToPath(Tile tile1, Tile tile2){
+
+        path.add(new Tile[]{tile1, tile2});
+
+        return path;
     }
 
     // returns whether given tile is an exposed(playable) tile
@@ -155,24 +212,26 @@ public class Board {
         return sides && above;
     }
 
-    // removes tile from board if exposed
-    public boolean removeTiles(Tile tile1, Tile tile2){
-        // tiles are not exposed and cannot be removed
-        if(!isExposed(tile1) || !isExposed(tile2)){return false;}
-        // check that tiles are not the same instance
-        if(tile1 == tile2){return false;}
-        // check if tiles match
-        if(!tile1.getUniqueString().equals(tile2.getUniqueString())){return false;}
-
-        setBoardNull(tile1);
-        setBoardNull(tile2);
-
-        return true;
+    // returns current depth of the board
+    public int getDepth(){
+        int depth = 0;
+        for(Tile tile : tiles){
+            int tileDepth = tile.getZLayer();
+            if(tileDepth > depth){
+                depth = tileDepth;
+            }
+        }
+        return depth;
     }
 
     // getter for existentTileCount
     public int getExistentTileCount(){
         return existentTileCount;
+    }
+
+    // getter for path
+    public ArrayList<Tile[]> getPath(){
+        return path;
     }
 
     // getter for all tiles
