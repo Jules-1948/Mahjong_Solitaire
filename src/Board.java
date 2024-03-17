@@ -111,7 +111,6 @@ public class Board {
             }
         }
 
-
         this.suitCounts = new int[suitNum];
         for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
 
@@ -137,20 +136,12 @@ public class Board {
             if (tiles1.get(i).areEqualTiles(tiles2.get(i))) {
                 sameCount++;
             }
-            // if(tiles1.get(i).getUniqueString().equals(tiles2.get(i).getUniqueString())){
-            //     if(tiles1.get(i).getTopLeftX() == tiles2.get(i).getTopLeftX()){
-            //         if(tiles1.get(i).getTopLeftY() == tiles2.get(i).getTopLeftY()){
-            //             if(tiles1.get(i).getZLayer() == tiles2.get(i).getZLayer()){
-            //                 sameCount++;
-            //             }
-            //         }
-            //     }
-            // }
         }
 
         return sameCount == existentTileCount;
     }
 
+    // Returns true if tiles can be removed, false otherwise
     public boolean canRemoveTiles(Tile tile1, Tile tile2){
         // tiles are not exposed and cannot be removed
         if(!isExposed(tile1) || !isExposed(tile2)){return false;}
@@ -379,6 +370,7 @@ public class Board {
 
     }
 
+    // Sets all 4 array places to equal same instance of input Tile
     private void setBoardTile(int x, int y, int z, Tile tile){
         board[x][y][z] = tile;
         board[x+1][y][z] = tile;
@@ -388,6 +380,7 @@ public class Board {
         tiles.add(tile);
     }
 
+    // Removes tile from tiles and nulls out location in the board
     private void setBoardNull(Tile tile){
         
         int x = tile.getTopLeftX();
@@ -399,7 +392,12 @@ public class Board {
         board[x][y+1][z] = null;
         board[x+1][y+1][z] = null;
 
-        tiles.remove(tile);
-        existentTileCount--;
+        // Done this way in case input tile is from a parent board and is not the same instance
+        for(Tile boardTile : tiles){
+            if(boardTile.areEqualTiles(tile)){
+                tiles.remove(tile);
+                existentTileCount--;
+            }
+        }
     }
 }
