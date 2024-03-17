@@ -81,11 +81,6 @@ public class Board {
             int face = getNextFace(suit, rand);
             createNewTile(location, suit, face);
         }
-
-        System.out.println("Suit Counts:");
-        for(int suit: suitCounts){
-            System.out.print(suit);
-        }
     }
 
     //Used for deep copying of board
