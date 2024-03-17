@@ -21,14 +21,14 @@ public class BeamStack {
         this.w = w;
     }
 
-    public ArrayList<Tile[]> runInstance(Board startingBoard, int verbosity){
+    public Board runInstance(Board startingBoard, int verbosity){
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
 
         //Initalizes openList with possible values
         ArrayList<Pair> openList = getRemovableTilePairs(startingBoard);
+        printBoardVerbage(startingBoard, verbosity);
         while(!openList.isEmpty()) {
-
             // Get best pair, remove it from its board, and then save its board to be expanded later
             for (int i = 0; i < w; i++) {
                 try {
@@ -38,12 +38,13 @@ public class BeamStack {
 
                     //Apply move to the pair's board
                     Board newBoard = bestPair.getBoard().deepCopy();
+                    printBoardVerbage(newBoard, verbosity);
                     newBoard.addToPath(bestPair.getEntry1(), bestPair.getEntry2());
                     newBoard.removeTiles(bestPair.getEntry1(), bestPair.getEntry2());
 
                     //Check to see if it would cause a success
                     if (newBoard.getExistentTileCount() == 0) {
-                        return newBoard.getPath();
+                        return newBoard;
                     }
 
                     //Save the board for future reference
@@ -63,15 +64,7 @@ public class BeamStack {
             }
         } 
 
-        //Algoithm failed to find a path, so finds largest path, and returns that
-        Board bestBoard = boards[0];
-        for (Board board: boards){
-            if (board.getPath().size() > bestBoard.getPath().size()) {
-                bestBoard = board;
-            }
-        }
-
-        return bestBoard.getPath();
+        return boards[0];
     }
 
     private ArrayList<Pair> getRemovableTilePairs(Board board) {
@@ -125,11 +118,13 @@ public class BeamStack {
 
     private void printBoardVerbage(Board board, int verbosity) {
         if (verbosity != 0) {
-            if (verbosity >= 2) {
-                System.out.println("Selected a board");
+            if (verbosity >= 1) {
+                System.out.println("This is a board");
                 System.out.println("Its path length is " + board.getPath().size());
+            }
+            if (verbosity >= 2) {
                 System.out.println("Its current depth is " + board.getDepth());
-                System.out.println("Its current remaining tile count is " + board.getTiles().size());
+                System.out.println("Its current remaining tile count is " + board.getExistentTileCount());
             }
             if (verbosity >= 3) {
                 System.out.println("It looks like this: ");

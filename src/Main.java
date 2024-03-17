@@ -9,8 +9,8 @@ public class Main{
 
 
         Board classicBoard = new Board(238493280, "classic");
-        BeamStack algorithm2 = new BeamStack(1);
-        System.out.println(algorithm2.runInstance(classicBoard, 3).size());
+        BeamStack algorithm2 = new BeamStack(2);
+        System.out.println(algorithm2.runInstance(classicBoard, 3));
     }
     
 }
