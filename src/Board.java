@@ -134,15 +134,18 @@ public class Board {
 
         // boards are the same size, so I can do this
         for(int i=0; i<existentTileCount; i++){
-            if(tiles1.get(i).getUniqueString().equals(tiles2.get(i).getUniqueString())){
-                if(tiles1.get(i).getTopLeftX() == tiles2.get(i).getTopLeftX()){
-                    if(tiles1.get(i).getTopLeftY() == tiles2.get(i).getTopLeftY()){
-                        if(tiles1.get(i).getZLayer() == tiles2.get(i).getZLayer()){
-                            sameCount++;
-                        }
-                    }
-                }
+            if (tiles1.get(i).areEqualTiles(tiles2.get(i))) {
+                sameCount++;
             }
+            // if(tiles1.get(i).getUniqueString().equals(tiles2.get(i).getUniqueString())){
+            //     if(tiles1.get(i).getTopLeftX() == tiles2.get(i).getTopLeftX()){
+            //         if(tiles1.get(i).getTopLeftY() == tiles2.get(i).getTopLeftY()){
+            //             if(tiles1.get(i).getZLayer() == tiles2.get(i).getZLayer()){
+            //                 sameCount++;
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         return sameCount == existentTileCount;
@@ -397,5 +400,6 @@ public class Board {
         board[x+1][y+1][z] = null;
 
         tiles.remove(tile);
+        existentTileCount--;
     }
 }

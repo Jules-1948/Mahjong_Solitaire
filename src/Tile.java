@@ -75,8 +75,16 @@ public class Tile {
         return face;
     }
 
-    // Author: Tyler Jamess
+    // Author: Tyler James
     public Tile deepCopy() {
         return new Tile(this);
+    }
+
+    // Author: Tyler James
+    public boolean areEqualTiles(Tile checkAgainst){
+        return topLeftX == checkAgainst.topLeftX && 
+        topLeftY ==checkAgainst.topLeftY && 
+        zLayer == checkAgainst.zLayer && 
+        getUniqueString().equals(checkAgainst.getUniqueString());
     }
 }
