@@ -74,21 +74,6 @@ public class BeamStack {
         return bestBoard.getPath();
     }
 
-    private void printBoardVerbage(Board board, int verbosity) {
-        // if (verbosity != 0) {
-        //     if (verbosity >= 2) {
-        //         System.out.println("Selected a board");
-        //         System.out.println("Its path length is " + board.getPath().size());
-        //         System.out.println("Its current depth is " + board.getDepth());
-                // System.out.println("Its current remaining tile count is " + board.getTiles().size());
-        //     }
-            // if (verbosity >= 3) {
-            //     System.out.println("It looks like this: ");
-            //     System.out.println(board);
-            // }
-        // }
-    }
-
     private ArrayList<Pair> getRemovableTilePairs(Board board) {
         ArrayList<Tile> exposedTiles = board.getExposedTiles();
         
@@ -134,5 +119,22 @@ public class BeamStack {
         }
 
         return tile1Score + tile2Score;
+    }
+
+    
+
+    private void printBoardVerbage(Board board, int verbosity) {
+        if (verbosity != 0) {
+            if (verbosity >= 2) {
+                System.out.println("Selected a board");
+                System.out.println("Its path length is " + board.getPath().size());
+                System.out.println("Its current depth is " + board.getDepth());
+                System.out.println("Its current remaining tile count is " + board.getTiles().size());
+            }
+            if (verbosity >= 3) {
+                System.out.println("It looks like this: ");
+                System.out.println(board);
+            }
+        }
     }
 }

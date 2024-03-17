@@ -393,11 +393,16 @@ public class Board {
         board[x+1][y+1][z] = null;
 
         // Done this way in case input tile is from a parent board and is not the same instance
+        Tile removeTile = null;
         for(Tile boardTile : tiles){
             if(boardTile.areEqualTiles(tile)){
-                tiles.remove(tile);
+                removeTile = boardTile;
                 existentTileCount--;
+                break;
             }
+        }
+        if(removeTile != null){
+            tiles.remove(removeTile);
         }
     }
 }
