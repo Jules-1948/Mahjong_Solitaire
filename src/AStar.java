@@ -3,14 +3,17 @@
  */
 public class AStar {
 
-    // Your solver method or class should have a single verbosity parameter that defaults to showing the final result
-    // only but can be set to another value (or values) to print out more details about the steps the algorithm is taking.
-    // For example, for verbosity=1, my CSP solver might print out every time it tries to assign a value to a variable, and
-    // with verbosity=2, it prints out each domain of the variables in addition.
+    
+    // Runs the A* algorithm -- called from constructors
 
-    public void runInstance(){
-        ClassicBoard board = new ClassicBoard(543891); //3829432);
-        ClassicBoard boardClone = board.deepCopy();
+    /**
+     * Runs A* algorithm on one instance of a Classic Board shape and prints results according to verbosity setting
+     * @param verbosity - sets degree of console output 
+     *                      1 = final result 
+     *                      2 = Initial board && each set of tiles removed in order && final board
+     */
+    private void runInstance(int verbosity, Board board){
+        Board boardClone = board.deepCopy();
 
         boolean noneRemoved = true;
         while(!boardClone.getExposedTiles().isEmpty() && noneRemoved){
@@ -23,8 +26,67 @@ public class AStar {
                     }
                 }
             }
-            System.out.println(board);
-            System.out.println(boardClone);
         }
+    }
+
+
+
+    // All public Constructors
+
+    /**
+     * Runs classic board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     */
+    public void runClassicInstance(long seed){
+        Board classic = new Board(seed, "classic"); //3829432
+        runInstance(1, classic);
+    }
+    
+    /**
+     * Runs classic board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     * @param verbosity -- sets degree of console output 
+     */
+    public void runClassicInstance(long seed, int verbosity){
+        Board classic = new Board(seed, "classic"); //3829432
+        runInstance(verbosity, classic);
+    }
+
+    /**
+     * Runs pyramid board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     */
+    public void runPyramidInstance(long seed){
+        Board pyramid = new Board(seed, "pyramid");
+        runInstance(1, pyramid);
+    }
+
+    /**
+     * Runs pyramid board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     * @param verbosity -- sets degree of console output 
+     */
+    public void runPyramidInstance(long seed, int verbosity){
+        Board pyramid = new Board(seed, "pyramid");
+        runInstance(verbosity, pyramid);
+    }
+
+    /**
+     * Runs fish board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     */
+    public void runFishInstance(long seed){
+        Board fish = new Board(seed, "fish");
+        runInstance(1, fish);
+    }
+
+    /**
+     * Runs fish board with default verbosity of 1
+     * @param seed -- seeds random generator to create unique game boards
+     * @param verbosity -- sets degree of console output ,
+     */
+    public void runFishInstance(long seed, int verbosity){
+        Board fish = new Board(seed, "fish");
+        runInstance(verbosity, fish);
     }
 }

@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-public class ClassicBoard {
+public class Board {
     // Board Variables
     final private int numDimensions = 3; // width, length, depth -- used only in contructor
-    final private int boardX = 30; // x dimension of the board
-    final private int boardY = 16; // y dimension of the board
-    final private int boardZ = 5; // z dimension of the board -- 0 is the bottom layer
+    private String boardType;
+    private int boardX; // x dimension of the board
+    private int boardY; // y dimension of the board
+    private int boardZ; // z dimension of the board -- 0 is the bottom layer
     private Tile[][][] board; // represents actual game board
 
     // Tile Generation Variables
@@ -23,16 +24,79 @@ public class ClassicBoard {
     final private int[] multiplesOfSuit = {4, 4, 4, 4, 4, 1, 1}; // how many multiples of each suit
     private int[] suitCounts; // number of tiles for each suit remaining to be created
     private int[][] faceCounts; // number of faces within each suit remaining to be created
-    private int[][] classicBoardTileSpaces; // array of 3D locations for tiles(left corner only)
+    private int[][] boardTileSpaces; // array of 3D locations for tiles(left corner only)
     private ArrayList<Tile> tiles; // arrayList of all tiles currently in game
     private int existentTileCount; // number of existant and in play tiles
 
-    
+
+    /**
+     * Creates an instance of a mahjong solitaire game board
+     * @param seed -- used for the Random number generator used for tile placement
+     * @param boardType -- options are "classic" "pyramid" and "fish". Anything else will default to classic.
+     */
+    public Board(long seed, String boardType){
+        // Set dimensions for given board
+        if(boardType.toLowerCase().equals("pyramid")){
+            //needs updated
+            this.boardType = "pyramid";
+            boardX = -1;
+            boardY = -1;
+            boardZ = -1;
+        } else if(boardType.toLowerCase().equals("fish")){
+            //needs updated
+            this.boardType = "fish";
+            boardX = -1;
+            boardY = -1;
+            boardZ = -1;
+        } else{
+            this.boardType = "classic";
+            boardX = 30;
+            boardY = 16;
+            boardZ = 5;
+        }
+
+        // Initialize values according to static rules, suit counts, and face counts of the game
+        board = new Tile[boardX][boardY][boardZ];
+        existentTileCount = 0;
+        boardTileSpaces = new int[totalTileCount][numDimensions];
+        tiles = new ArrayList<>();
+
+        suitCounts = new int[suitNum];
+        for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
+
+        faceCounts = new int[suitNum][facesPerSuit[0]];
+        for(int i=0; i<suitNum; i++){ //iterates through suits
+            for(int j=0; j<facesPerSuit[i]; j++){ //iterates through faces
+                faceCounts[i][j] = multiplesOfSuit[i];
+            }
+        }
+
+        // Fetch tile locations from file
+        initializeTileSpaces();
+
+        // Create and place all tiles for board
+        Random rand = new Random(seed);
+        for(int[] location: boardTileSpaces){
+            int suit = getNextSuit(rand);
+            int face = getNextFace(suit, rand);
+            createNewTile(location, suit, face);
+        }
+
+        System.out.println("Suit Counts:");
+        for(int suit: suitCounts){
+            System.out.print(suit);
+        }
+    }
+
     //Used for deep copying of board
-    private ClassicBoard(ClassicBoard parentBoard) {
+    private Board(Board parentBoard) {
+        boardX = parentBoard.boardX;
+        boardY = parentBoard.boardY;
+        boardZ = parentBoard.boardZ;
         existentTileCount = 0;
         tiles = new ArrayList<>();
-        classicBoardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
+        boardTileSpaces = new int[totalTileCount][numDimensions]; //not really used in this constructor
+        boardType = parentBoard.boardType; //also not really used in this constructor
         board = new Tile[boardX][boardY][boardZ];
         for(int z=0; z<boardZ; z++){
             for(int y=0; y<boardY-1; y++){
@@ -54,35 +118,6 @@ public class ClassicBoard {
             for(int j=0; j<facesPerSuit[i]; j++){ //iterates through faces
                 faceCounts[i][j] = multiplesOfSuit[i];
             }
-        }
-    }
-
-    public ClassicBoard(long seed){
-        // Initialize all values according to static rules, tile counts, suit counts, and board layout of the game
-        board = new Tile[boardX][boardY][boardZ];
-        existentTileCount = 0;
-        classicBoardTileSpaces = new int[totalTileCount][numDimensions];
-        tiles = new ArrayList<>();
-
-        suitCounts = new int[suitNum];
-        for(int i=0; i<suitNum; i++){suitCounts[i] = facesPerSuit[i]*multiplesOfSuit[i];}
-
-        faceCounts = new int[suitNum][facesPerSuit[0]];
-        for(int i=0; i<suitNum; i++){ //iterates through suits
-            for(int j=0; j<facesPerSuit[i]; j++){ //iterates through faces
-                faceCounts[i][j] = multiplesOfSuit[i];
-            }
-        }
-
-        // Fetch tile locations from file
-        initializeTileSpaces();
-
-        // Create and place all tiles for board
-        Random rand = new Random(seed);
-        for(int[] location: classicBoardTileSpaces){
-            int suit = getNextSuit(rand);
-            int face = getNextFace(suit, rand);
-            createNewTile(location, suit, face);
         }
     }
 
@@ -166,10 +201,10 @@ public class ClassicBoard {
     // prints current game board layer by layer
     @Override
     public String toString(){
-        String boardString = "";
+        String boardString = "\n\n";
 
         for(int z=0; z<boardZ; z++){
-            boardString = boardString + "\nLayer " + z + "\n";
+            boardString = boardString + "Layer " + z + "\n";
 
             for(int y=0; y<boardY; y++){
                 for(int x=0; x<boardX; x++){
@@ -190,8 +225,8 @@ public class ClassicBoard {
         return boardString;
     }
 
-    public ClassicBoard deepCopy() {
-        return new ClassicBoard(this);
+    public Board deepCopy() {
+        return new Board(this);
     }
 
 
@@ -256,7 +291,14 @@ public class ClassicBoard {
     // initialize double int array of all tile locations to be filled with a tile
     private void initializeTileSpaces(){
         try{
-            File locationInput = new File("src\\BoardTileLocations\\ClassicBoard.txt");
+            File locationInput;
+            if(boardType.equals("pyramid")){
+                locationInput = new File("src\\BoardTileLocations\\PyramidBoard.txt");
+            } else if(boardType.equals("fish")){
+                locationInput = new File("src\\BoardTileLocations\\FishBoard.txt");
+            }else{
+                locationInput = new File("src\\BoardTileLocations\\ClassicBoard.txt");
+            }
             Scanner spaceScnr = new Scanner(locationInput);
 
             int readLoctions = 0;
@@ -265,7 +307,7 @@ public class ClassicBoard {
                 int x = spaceScnr.nextInt() - 1;
                 int y = spaceScnr.nextInt() - 1;
                 int z = spaceScnr.nextInt() - 1;
-                classicBoardTileSpaces[readLoctions] = new int[]{x, y, z};
+                boardTileSpaces[readLoctions] = new int[]{x, y, z};
                 readLoctions++;
             }
 
