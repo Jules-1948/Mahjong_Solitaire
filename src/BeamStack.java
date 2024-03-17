@@ -24,14 +24,10 @@ public class BeamStack {
     public ArrayList<Tile[]> runInstance(Board startingBoard, int verbosity){
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
-        // printBoardVerbage(startingBoard, verbosity);
 
         //Initalizes openList with possible values
         ArrayList<Pair> openList = getRemovableTilePairs(startingBoard);
         while(!openList.isEmpty()) {
-            // if (verbosity!= 0) {
-                // System.out.println("Open List's Size is: " + openList.size());
-            // }
 
             // Get best pair, remove it from its board, and then save its board to be expanded later
             for (int i = 0; i < w; i++) {
@@ -42,17 +38,8 @@ public class BeamStack {
 
                     //Apply move to the pair's board
                     Board newBoard = bestPair.getBoard().deepCopy();
-                    // System.out.println("Its path length is " + newBoard.getPath().size());
-                    System.out.println("Its current remaining tile count is " + newBoard.getTiles().size());
-                    if (newBoard.getTiles().size() == 140 || newBoard.getTiles().size() == 139) {
-                        System.out.println("Tile set");
-                        System.out.println(bestPair.getEntry1().toString(true));
-                        System.out.println(bestPair.getEntry1().toString(true));
-                    }
                     newBoard.addToPath(bestPair.getEntry1(), bestPair.getEntry2());
                     newBoard.removeTiles(bestPair.getEntry1(), bestPair.getEntry2());
-                    // System.out.println("Its new remaining tile count is " + newBoard.getTiles().size());
-                    // printBoardVerbage(newBoard, verbosity);
 
                     //Check to see if it would cause a success
                     if (newBoard.getExistentTileCount() == 0) {
@@ -73,13 +60,7 @@ public class BeamStack {
                 //For each board add possible next moves to open list
                 ArrayList<Pair> removableTilePairs = getRemovableTilePairs(board);
                 openList.addAll(removableTilePairs);
-
-                // printBoardVerbage(board, verbosity);
             }
-            
-            // if (verbosity!= 0) {
-                // System.out.println("Open List's Size at end of cycle: " + openList.size());
-            // }
         } 
 
         //Algoithm failed to find a path, so finds largest path, and returns that
@@ -112,19 +93,12 @@ public class BeamStack {
         ArrayList<Tile> exposedTiles = board.getExposedTiles();
         
         ArrayList<Pair> tilePairs = new ArrayList<>();
-        for(Tile tile1 : exposedTiles){
-            for(Tile tile2 : exposedTiles){
+        for(int i = 0; i < exposedTiles.size(); i++){
+            for(int j = i + 1; j < exposedTiles.size(); j++ ){
+                Tile tile1 = exposedTiles.get(i);
+                Tile tile2 = exposedTiles.get(j);
                 if(board.canRemoveTiles(tile1, tile2)){
-                    boolean canBeRemoved = true;
-                    for (Pair selectedPairs: tilePairs) {
-                        if (selectedPairs.contains(tile1) || selectedPairs.contains(tile2)) {
-                            canBeRemoved = false;
-                        }
-                    }
-
-                    if (canBeRemoved) {
-                        tilePairs.add(new Pair(tile1, tile2, board));
-                    }
+                    tilePairs.add(new Pair(tile1, tile2, board));
                 }
             }
         }
