@@ -4,7 +4,16 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class AStar {
+public class AStar extends Timeout {
+    private long numberOfNodesSearched = 0;
+
+    public AStar() {
+        super(0);
+    }
+
+    public AStar(long timeout) {
+        super(timeout);
+    }
 
     public Board runInstance(Board startingNode){
         return runInstance(startingNode, 1);
@@ -20,6 +29,10 @@ public class AStar {
      *                      3 = Initial board, each set of tiles removed in order, running total of numNodesSearched, & final board
      */
     public Board runInstance(Board startingNode, int verbosity){
+        if (timeout > 0) {
+            startTimeoutClock();
+        }
+
         // Print starting board
         if(verbosity >= 2){
             System.out.println("\nStarting board -> No tiles removed yet.");
@@ -28,7 +41,7 @@ public class AStar {
 
         // Initialize variables for verbosity and analysis
         Board lastSearchedBoard = startingNode; //used to print last board at the end when verbosity == 2 or 3
-        long numNodesSearched = 0;
+        numberOfNodesSearched = 0;
         
         // 1. Initialize fringe to starting state, closed list to empty
         ArrayList<Board> fringe = new ArrayList<Board>();
@@ -37,15 +50,18 @@ public class AStar {
 
         // 2. While fringe is not empty:
         while(!fringe.isEmpty()){
+            if (timedout) {
+                break;
+            }
             // 3. searchNode <- fringe.removeFirst()
             Board searchNode = fringe.get(0);
             fringe.remove(0);
-            numNodesSearched++;
+            numberOfNodesSearched++;
             lastSearchedBoard = searchNode;
 
             // print path to searchNode
             if(verbosity >= 2){
-                System.out.println("\nnumNodesSearched: " + numNodesSearched);
+                System.out.println("\nnumNodesSearched: " + numberOfNodesSearched);
             }
             if(verbosity >= 3){
                 ArrayList<Tile[]> currentNodePath = searchNode.getPath();
@@ -111,6 +127,7 @@ public class AStar {
             } 
         }
 
+        cancelAndResetClock();
         return lastSearchedBoard;
     }
 
@@ -156,5 +173,9 @@ public class AStar {
         }
 
         return tilePairs;
+    }
+
+    public long getNodesSearched() {
+        return numberOfNodesSearched;
     }
 }

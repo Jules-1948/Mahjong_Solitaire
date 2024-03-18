@@ -7,10 +7,10 @@ import java.util.Stack;
  * Beam Stack Search
  * Pseudo code came from: https://www.geeksforgeeks.org/introduction-to-beam-search-algorithm/
  */
-public class BeamStack {
+public class BeamStack extends Timeout {
     private int w; //The width of the beam
     private int l; //The search depth that should be checked to find new canidate nodes
-    private int numberOfNodesSearched = 0;
+    private long numberOfNodesSearched = 0; //Total number of search nodes explored for the run
 
     /**
      * Creates a beam stack search
@@ -18,6 +18,18 @@ public class BeamStack {
      * @param l The search depth that should be checked to find new canidate nodes
      */
     public BeamStack(int w, int l) {
+        super(0);
+        this.w = w;
+        this.l = l;
+    }
+/**
+     * Creates a beam stack search
+     * @param w The width of the beam
+     * @param l The search depth that should be checked to find new canidate nodes
+     * @param timeout The time the program should wait before timing out and returning its result
+     */
+    public BeamStack(int w, int l, long timeout) {
+        super(timeout);
         this.w = w;
         this.l = l;
     }
@@ -37,6 +49,11 @@ public class BeamStack {
      * @return
      */
     public Board runInstance(Board startingBoard, int verbosity){
+        //Starts timeout clock
+        if (timeout > 0) {
+            startTimeoutClock();
+        }
+
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
         //Sets starting value to 0
@@ -45,6 +62,11 @@ public class BeamStack {
         //Initalizes fringe with possible values of starting board
         ArrayList<Board> fringe = getFutureBoards(startingBoard);
         while(!fringe.isEmpty()) {
+            // Checks if should give up searching
+            if (timedout) {
+                break;
+            }
+
             // Sort the board
             Collections.sort(fringe);
             
@@ -93,6 +115,7 @@ public class BeamStack {
             }
         } 
 
+        cancelAndResetClock();
         if (verbosity >= 1) {
             System.out.println(boards[0]);
         } 
@@ -187,6 +210,10 @@ public class BeamStack {
         Stack<Board> fringe = new Stack<>();
         fringe.addAll(getFutureBoards(initalBoard));
         while (!fringe.isEmpty()) {
+            if (timedout) {
+                break;
+            }
+
             Board board = fringe.pop();
 
             ArrayList<Board> futureBoards = getFutureBoards(board);
@@ -244,7 +271,7 @@ public class BeamStack {
         return tilePairs; 
     }
 
-    public int getNodesSearched() {
+    public long getNodesSearched() {
         return numberOfNodesSearched;
     }
 }
