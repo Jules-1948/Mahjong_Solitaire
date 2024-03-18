@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class AStar {
+
+    public ArrayList<Tile[]> runInstance(Board startingNode){
+        return runInstance(startingNode, 1);
+    }
     
     /**
      * Pseudocode referenced from 03_AStarExample Slide from class
@@ -15,7 +19,7 @@ public class AStar {
      *                      2 = Initial board && final board
      *                      3 = Initial board && each set of tiles removed in order && final board
      */
-    private ArrayList<Tile[]> runInstance(int verbosity, Board startingNode){
+    public ArrayList<Tile[]> runInstance(Board startingNode, int verbosity){
         float startTime = System.currentTimeMillis();
         System.out.printf("Start Time: %.02f ms\n", startTime);
 
@@ -142,66 +146,5 @@ public class AStar {
         }
 
         return tilePairs;
-    }
-
-
-
-    // All public Constructors
-
-    /**
-     * Runs classic board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     */
-    public ArrayList<Tile[]> runClassicInstance(long seed){
-        Board classic = new Board(seed, "classic");
-        return runInstance(1, classic);
-    }
-    
-    /**
-     * Runs classic board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     * @param verbosity -- sets degree of console output 
-     */
-    public ArrayList<Tile[]> runClassicInstance(long seed, int verbosity){
-        Board classic = new Board(seed, "classic");
-        return runInstance(verbosity, classic);
-    }
-
-    /**
-     * Runs pyramid board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     */
-    public ArrayList<Tile[]> runPyramidInstance(long seed){
-        Board pyramid = new Board(seed, "pyramid");
-        return runInstance(1, pyramid);
-    }
-
-    /**
-     * Runs pyramid board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     * @param verbosity -- sets degree of console output 
-     */
-    public ArrayList<Tile[]> runPyramidInstance(long seed, int verbosity){
-        Board pyramid = new Board(seed, "pyramid");
-        return runInstance(verbosity, pyramid);
-    }
-
-    /**
-     * Runs fish board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     */
-    public ArrayList<Tile[]> runFishInstance(long seed){
-        Board fish = new Board(seed, "fish");
-        return runInstance(1, fish);
-    }
-
-    /**
-     * Runs fish board with default verbosity of 1
-     * @param seed -- seeds random generator to create unique game boards
-     * @param verbosity -- sets degree of console output ,
-     */
-    public ArrayList<Tile[]> runFishInstance(long seed, int verbosity){
-        Board fish = new Board(seed, "fish");
-        return runInstance(verbosity, fish);
     }
 }
