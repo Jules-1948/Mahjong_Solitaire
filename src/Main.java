@@ -2,10 +2,12 @@
  * @author Tyler James and Julia Schaming
  */
 public class Main{
-    private static int iterations = 10;
+    private static int iterations = 10; //Number of boards to run searches on
 
     public static void main(String[] args) {
         // Can create Boards of type "classic", "pyramid", and "fish"
+
+        //Initalize starting boards
         Board[] boards = {
             new Board(238493280, "fish"),
             new Board(218028333, "fish"),
@@ -20,6 +22,7 @@ public class Main{
         };
 
         long timeout = 240000; // If takes longer that 4 minutes time out
+        //Initalize Results Storage
         Board[] beamStackResults = new Board[iterations];
         long[] beamStackNodeSearchedResults= new long[iterations];
         Board[] aStarResults = new Board[iterations];
@@ -29,12 +32,14 @@ public class Main{
         BeamStack beamStack = new BeamStack(2, 2, timeout);
         AStar aStar = new AStar(timeout);
         
+        //Run iterations on beamstack using boards
         System.out.println("Running iterations on BeamStack");
         for (int i = 0; i < iterations; i++) {
             System.out.println("Iteration Number for BeamStack: " + i);
             beamStackResults[i] = beamStack.runInstance(boards[i]);
             beamStackNodeSearchedResults[i] = beamStack.getNodesSearched();
         }
+        //Run iterations on A* using boards
         System.out.println("Running iterations on A Star");
         for (int i = 0; i < iterations; i++) {
             System.out.println("Iteration Number for A Star: " + i);
@@ -42,12 +47,15 @@ public class Main{
             aStarNodeSearchedResults[i] = aStar.getNodesSearched();
         }
 
+        //Print the results
         System.out.println("Printing results");
+        //Results of beamstack
         System.out.println("Beam Stack Search");
         printSolutionRatios(beamStackResults);
         printAvergageRemainingTiles(beamStackResults);
         printAverageNodes(beamStackNodeSearchedResults);
 
+        //Results of A*
         System.out.println("A Star Search");
         printSolutionRatios(aStarResults);
         printAvergageRemainingTiles(aStarResults);

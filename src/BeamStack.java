@@ -106,7 +106,7 @@ public class BeamStack extends Timeout {
             for (Board board: boards) {
                 try {
                     //For each board, add possible next moves to fringe utilizing dfs
-                    ArrayList<Board> futureBoards = dfs(board, 0);
+                    ArrayList<Board> futureBoards = dlfs(board, 0);
                     
                     //Print verbage
                     if (verbosity >= 1) {
@@ -188,7 +188,7 @@ public class BeamStack extends Timeout {
 
             for (Board board: boards) {
                 //For each board, add possible next moves to fringe utilizing dfs
-                ArrayList<Board> futureBoards = dfs(board, 0);
+                ArrayList<Board> futureBoards = dlfs(board, 0);
                 
                 //Print verbage
                 if (verbosity >= 1) {
@@ -207,7 +207,7 @@ public class BeamStack extends Timeout {
      * @param depth Current depth from initial board
      * @return
      */
-    private ArrayList<Board> dfs(Board initalBoard, int depth) {
+    private ArrayList<Board> dlfs(Board initalBoard, int depth) {
         ArrayList<Board> possibleBoards = new ArrayList<>();
 
         //Base case for bottom of search
@@ -227,7 +227,7 @@ public class BeamStack extends Timeout {
             if (depth == l || futureBoards.isEmpty()) {
                 possibleBoards.add(board);
             }
-            possibleBoards.addAll(dfs(board, depth + 1));
+            possibleBoards.addAll(dlfs(board, depth + 1));
         }
 
         //Base case for empty fringe
