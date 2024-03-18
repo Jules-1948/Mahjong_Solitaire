@@ -25,13 +25,18 @@ public class BeamStack {
         this.l = l;
     }
 
+    public Board runInstance(Board startingBoard) {
+        return runInstance(startingBoard, 1);
+    }
+
     public Board runInstance(Board startingBoard, int verbosity){
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
+        Board mySpecialBoard = startingBoard;
+        int count = 0;
 
         //Initalizes openList with possible values
         ArrayList<Board> fringe = getFutureBoards(startingBoard);
-        // printBoardVerbage(startingBoard, verbosity);
         while(!fringe.isEmpty()) {
             // Get best board, remove it from its board, and then save its board to be expanded later
             Collections.sort(fringe);
@@ -54,7 +59,14 @@ public class BeamStack {
                 } 
             }
 
-            //Clear the list to add new Pair choices for the new boards
+            // mySpecialBoard = boards[0].deepCopy();
+            // System.out.println(count);
+            if (count % 10 == 0) {
+                mySpecialBoard = boards[0].deepCopy();
+                System.out.println(mySpecialBoard);
+            }
+            count++;
+            //Clear the list to add new next moves
             fringe.clear();
 
             for (Board board: boards) {
@@ -65,11 +77,11 @@ public class BeamStack {
             }
         } 
 
-        // if (verbosity >= 1) {
-        //     System.out.println("A soultion was found!");
-        // }
-        // printBoardVerbage(startingBoard, verbosity);
-        return boards[0];
+        
+        System.out.println(mySpecialBoard);
+        return mySpecialBoard;
+
+        // return boards[0];
     }
 
     private ArrayList<Board> dfs(Board initalBoard, int depth) {
@@ -84,7 +96,6 @@ public class BeamStack {
             Board board = fringe.pop();
 
             ArrayList<Board> futureBoards = getFutureBoards(board);
-            // System.out.println("Board fringe size: " + fringe.size());
             //Adds a board if it is an end node
             if (depth == l || futureBoards.isEmpty()) {
                 possibleBoards.add(board);
@@ -126,22 +137,5 @@ public class BeamStack {
         }
 
         return tilePairs; 
-    }
-
-    private void printBoardVerbage(Board board, int verbosity) {
-        if (verbosity != 0) {
-            if (verbosity >= 1) {
-                System.out.println("This is a board");
-                System.out.println("Its path length is " + board.getPath().size());
-            }
-            if (verbosity >= 2) {
-                System.out.println("Its current board depth is " + board.getDepth());
-                System.out.println("Its current remaining tile count is " + board.getExistentTileCount());
-            }
-            if (verbosity >= 3) {
-                System.out.println("It looks like this: ");
-                System.out.println(board);
-            }
-        }
     }
 }
