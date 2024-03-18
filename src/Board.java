@@ -40,15 +40,15 @@ public class Board implements Comparable<Board> {
         if(boardType.toLowerCase().equals("pyramid")){
             //needs updated
             this.boardType = "pyramid";
-            boardX = -1;
-            boardY = -1;
-            boardZ = -1;
+            boardX = 34;
+            boardY = 14;
+            boardZ = 7;
         } else if(boardType.toLowerCase().equals("fish")){
             //needs updated
             this.boardType = "fish";
-            boardX = -1;
-            boardY = -1;
-            boardZ = -1;
+            boardX = 24;
+            boardY = 16;
+            boardZ = 3;
         } else{
             this.boardType = "classic";
             boardX = 30;
