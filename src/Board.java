@@ -415,12 +415,12 @@ public class Board implements Comparable<Board> {
         board[x][y+1][z] = null;
         board[x+1][y+1][z] = null;
 
+        existentTileCount--;
         // Done this way in case input tile is from a parent board and is not the same instance
         Tile removeTile = null;
         for(Tile boardTile : tiles){
             if(boardTile.areEqualTiles(tile)){
                 removeTile = boardTile;
-                existentTileCount--;
                 break;
             }
         }

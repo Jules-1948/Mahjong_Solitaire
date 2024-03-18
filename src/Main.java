@@ -9,27 +9,27 @@ public class Main{
 
         //Initalize starting boards
         Board[] boards = {
-            new Board(238493280, "fish"),
-            new Board(218028333, "fish"),
-            new Board(930128322, "fish"),
-            new Board(908280111, "fish"),
-            new Board(157483684, "fish"),
-            new Board(803839321, "fish"),
-            new Board(782929272, "fish"),
-            new Board(493839388, "fish"),
-            new Board(637781668, "fish"),
-            new Board(902992984, "fish")
+            new Board(238493280, "classic"),
+            new Board(218028333, "classic"),
+            new Board(930128322, "classic"),
+            new Board(908280111, "classic"),
+            new Board(157483684, "classic"),
+            new Board(803839321, "classic"),
+            new Board(782929272, "classic"),
+            new Board(493839388, "classic"),
+            new Board(637781668, "classic"),
+            new Board(902992984, "classic")
         };
 
-        long timeout = 240000; // If takes longer that 4 minutes time out
+        long timeout = 300000; // If takes longer that 4 minutes time out
         //Initalize Results Storage
         Board[] beamStackResults = new Board[iterations];
         long[] beamStackNodeSearchedResults= new long[iterations];
         Board[] aStarResults = new Board[iterations];
         long[] aStarNodeSearchedResults= new long[iterations];
         
-        //Initalize algorithms
-        BeamStack beamStack = new BeamStack(2, 2, timeout);
+        // //Initalize algorithms
+        BeamStack beamStack = new BeamStack(6, timeout);
         AStar aStar = new AStar(timeout);
         
         //Run iterations on beamstack using boards
@@ -47,7 +47,7 @@ public class Main{
             aStarNodeSearchedResults[i] = aStar.getNodesSearched();
         }
 
-        //Print the results
+        // Print the results
         System.out.println("Printing results");
         //Results of beamstack
         System.out.println("Beam Stack Search");
@@ -91,7 +91,7 @@ public class Main{
                 count++;
             }
         }
-        System.out.println("Solutions found " + count/iterations);
+        System.out.println("Solutions found " + (double)count/iterations);
     }
 
     /**

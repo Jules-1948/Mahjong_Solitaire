@@ -9,29 +9,24 @@ import java.util.Stack;
  */
 public class BeamStack extends Timeout {
     private int w; //The width of the beam
-    private int l; //The search depth that should be checked to find new canidate nodes
     private long numberOfNodesSearched = 0; //Total number of search nodes explored for the run
 
     /**
      * Creates a beam stack search
      * @param w The width of the beam
-     * @param l The search depth that should be checked to find new canidate nodes
      */
-    public BeamStack(int w, int l) {
+    public BeamStack(int w) {
         super(0);
         this.w = w;
-        this.l = l;
     }
 /**
      * Creates a beam stack search
      * @param w The width of the beam
-     * @param l The search depth that should be checked to find new canidate nodes
      * @param timeout The time the program should wait before timing out and returning its result
      */
-    public BeamStack(int w, int l, long timeout) {
+    public BeamStack(int w,long timeout) {
         super(timeout);
         this.w = w;
-        this.l = l;
     }
 
     /**
@@ -54,34 +49,63 @@ public class BeamStack extends Timeout {
             startTimeoutClock();
         }
 
-        //Stores a board for each of the paths being expanded
-        Board[] boards = new Board[w];
         //Sets starting value to 0
         numberOfNodesSearched = 0;
 
+        //Stores a stack of board choices
+        Stack<Board[]> boardsSavedForLayer = new Stack<>();
+        Board[] firstBoardLayer = new Board[w];
+        firstBoardLayer[0] = startingBoard;
+        boardsSavedForLayer.push(firstBoardLayer);
+
+        Board bestBoardFoundDuringRun = startingBoard;
+        int worstScore = -1;
         //Initalizes fringe with possible values of starting board
-        ArrayList<Board> fringe = getFutureBoards(startingBoard);
-        while(!fringe.isEmpty()) {
-            // Checks if should give up searching
+        while(!boardsSavedForLayer.isEmpty()) {
+            if (verbosity >= 1) {
+                System.out.println("Stack Size: " + boardsSavedForLayer.size());
+            }
+            Board[] layersBoards = boardsSavedForLayer.peek();
             if (timedout) {
                 break;
             }
+            
+            //Create fringe and add next possible board states
+            ArrayList<Board> fringe = new ArrayList<>();
+            for (int i = 0; i < w; i++) {
+                if (layersBoards[i] != null) {
+                    ArrayList<Board> futureBoards = getFutureBoards(layersBoards[i]);
+                    int tempWorstScore = worstScore;
+                    futureBoards.removeIf(board -> scoreBoard(board) <= tempWorstScore);
+                    fringe.addAll(futureBoards);
+                }
+            }
+            if (verbosity >= 2) {
+                System.out.println("Fringe size: " + fringe.size());
+            }
+            
+            if (fringe.isEmpty()) {
+                worstScore = getHighestScoredBoard(boardsSavedForLayer.pop());
+                continue;
+            }
 
             // Sort the board
-            Collections.sort(fringe);
-            
+            Collections.sort(fringe, (o1, o2) -> Integer.compare(scoreBoard(o1), scoreBoard(o2)));
+            Collections.reverse(fringe);
+
             //Save w best new board nodes
+            Board[] wBoards = new Board[w];
             for (int i = 0; i < w; i++) {
-                try {
+                if (fringe.size() >= 1) {
+
                     //Get best board from fringe
                     Board bestBoard = fringe.remove(0);
-
-                    //Check to see if it would find a goal state and return if so
-                    if (bestBoard.getExistentTileCount() == 0) {
-                        return bestBoard;
-                    }
+                    numberOfNodesSearched++;
 
                     //Print verbage
+                    if (verbosity >= 2) {
+                        System.out.println("BoardScore: " + scoreBoard(bestBoard));
+                    }
                     if (verbosity >= 2) {
                         System.out.println("Best board[i] where i = " + i);
                         System.out.println("Boards overall depth is: " + bestBoard.getDepth());
@@ -91,43 +115,63 @@ public class BeamStack extends Timeout {
                         System.out.println(bestBoard);
                     }
 
-                    //Save the board for future reference
-                    boards[i] = bestBoard;
-                } catch(Exception e) {
-                    if (verbosity >= 1) {
-                        System.out.println(e);
+                    //Check to see if it would find a goal state and return if so
+                    if (bestBoard.getExistentTileCount() == 0) {
+                        cancelAndResetClock();
+                        if (verbosity >= 1) {
+                            System.out.println("Solution Found");
+                            System.out.println(bestBoard);
+                        } 
+                        return bestBoard;
+                    }
+
+                    //Save w best boards
+                    wBoards[i] = bestBoard;
+                    if (scoreBoard(bestBoard) < scoreBoard(bestBoardFoundDuringRun) ) {
+                        bestBoardFoundDuringRun = bestBoard;
                     }
                 } 
-            }
-
-            //Clear the list to add new next moves
-            fringe.clear();
-
-            for (Board board: boards) {
-                try {
-                    //For each board, add possible next moves to fringe utilizing dfs
-                    ArrayList<Board> futureBoards = dlfs(board, 0);
-                    
-                    //Print verbage
-                    if (verbosity >= 1) {
-                        System.out.println("Future board choices return size: " + futureBoards.size());
-                    }
-                    fringe.addAll(futureBoards);
-                } catch(Exception e) {
-                    if (verbosity >= 1) {
-                        System.out.println(e);
-                    }
-                }
-            }
-        } 
+            } 
+            boardsSavedForLayer.push(wBoards);
+        }
 
         cancelAndResetClock();
         if (verbosity >= 1) {
-            System.out.println(boards[0]);
+            System.out.println("No solution found");
+            System.out.println(bestBoardFoundDuringRun);
         } 
-        return boards[0];
+        //Would normally return null, but we are choosing to return the best that we found from a run
+        return bestBoardFoundDuringRun;
     }
 
+    private boolean checkIfAllNull(Board[] boards) {
+        for (Board board: boards) {
+            if (board != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int scoreBoard(Board board) {
+        int score = 0;
+        score += getRemovablePairs(board).size();
+
+        return score;
+    }
+
+    private int getHighestScoredBoard(Board[] boards) {
+        Board highestScoreBoard = boards[0];
+        if (highestScoreBoard == null) {
+            return Integer.MAX_VALUE;
+        }
+        for (Board board: boards) {
+            if (board != null && scoreBoard(board) > scoreBoard(highestScoreBoard)) {
+                highestScoreBoard = board;
+            }
+        }
+        return scoreBoard(highestScoreBoard);
+    }
 
     /**
      * Runs Beam Stack search on the instance
@@ -138,27 +182,68 @@ public class BeamStack extends Timeout {
     public Board getSmallerBoard(Board startingBoard, int verbosity){
         System.out.println("\nGenerating a smaller board...");
         //Stores a board for each of the paths being expanded
-        Board[] boards = new Board[w];
         Board mySpecialBoard = startingBoard;
         int count = 0;
 
+        //Starts timeout clock
+        if (timeout > 0) {
+            startTimeoutClock();
+        }
 
+        //Sets starting value to 0
+        numberOfNodesSearched = 0;
+
+        //Stores a stack of board choices
+        Stack<Board[]> boardsSavedForLayer = new Stack<>();
+        Board[] firstBoardLayer = new Board[w];
+        firstBoardLayer[0] = startingBoard;
+        boardsSavedForLayer.push(firstBoardLayer);
+
+        Board bestBoardFoundDuringRun = startingBoard;
+        int worstScore = -1;
         //Initalizes fringe with possible values of starting board
-        ArrayList<Board> fringe = getFutureBoards(startingBoard);
-        while(!fringe.isEmpty()) {
-            // Sort the board
-            Collections.sort(fringe);
+        while(!boardsSavedForLayer.isEmpty()) {
+            if (verbosity >= 1) {
+                System.out.println("Stack Size: " + boardsSavedForLayer.size());
+            }
+            Board[] layersBoards = boardsSavedForLayer.peek();
+
+            // System.out.println("Checking boards childeren");
             
+            //Create fringe and add next possible board states
+            ArrayList<Board> fringe = new ArrayList<>();
+            for (int i = 0; i < w; i++) {
+                if (layersBoards[i] != null) {
+                    ArrayList<Board> futureBoards = getFutureBoards(layersBoards[i]);
+                    int tempWorstScore = worstScore;
+                    futureBoards.removeIf(board -> scoreBoard(board) <= tempWorstScore);
+                    fringe.addAll(futureBoards);
+                }
+            }
+            
+            if (checkIfAllNull(layersBoards) || fringe.isEmpty()) {
+                // System.out.println("Backing up because no candiate childeren");
+                boardsSavedForLayer.pop();
+                if (boardsSavedForLayer.size() != 0) {
+                    worstScore = getHighestScoredBoard(boardsSavedForLayer.peek());
+                } else {
+                    break;
+                }
+                continue;
+            }
+
+            // Sort the board
+            Collections.sort(fringe, (o1, o2) -> Integer.compare(scoreBoard(o1), scoreBoard(o2)));
+            Collections.reverse(fringe);
+
             //Save w best new board nodes
+            Board[] wBoards = new Board[w];
             for (int i = 0; i < w; i++) {
                 try {
                     //Get best board from fringe
                     Board bestBoard = fringe.remove(0);
-
-                    //Check to see if it would find a goal state and return if so
-                    if (bestBoard.getExistentTileCount() == 0) {
-                        return bestBoard;
-                    }
+                    numberOfNodesSearched++;
+                    count++;
 
                     //Print verbage
                     if (verbosity >= 2) {
@@ -170,68 +255,39 @@ public class BeamStack extends Timeout {
                         System.out.println(bestBoard);
                     }
 
-                    //Save the board for future reference
-                    boards[i] = bestBoard;
+                    //Check to see if it would find a goal state and return if so
+                    if (bestBoard.getExistentTileCount() == 0) {
+                        cancelAndResetClock();
+                        if (verbosity >= 1) {
+                            System.out.println(bestBoard);
+                        } 
+                        return bestBoard;
+                    }
+
+                    //Save w best boards
+                    wBoards[i] = bestBoard;
+                    if (scoreBoard(bestBoard) < scoreBoard(bestBoardFoundDuringRun) ) {
+                        bestBoardFoundDuringRun = bestBoard;
+                        if (count % 15 == 0) {
+                            mySpecialBoard = bestBoard;
+                        }
+                    }
                 } catch(Exception e) {
-                    if (verbosity >= 1) {
+                    if (verbosity >= 2) {
                         System.out.println(e);
                     }
                 } 
-            }
-
-            if (count % 20 == 0) {
-                mySpecialBoard = boards[0].deepCopy();
-            }
-            count++;
-            //Clear the list to add new next moves
-            fringe.clear();
-
-            for (Board board: boards) {
-                //For each board, add possible next moves to fringe utilizing dfs
-                ArrayList<Board> futureBoards = dlfs(board, 0);
-                
-                //Print verbage
-                if (verbosity >= 1) {
-                    System.out.println("Future board choices return size: " + futureBoards.size());
-                }
-                fringe.addAll(futureBoards);
-            }
-        } 
-
-        return mySpecialBoard;
-    }
-
-    /**
-     * Runs depth first search up to the depth limit for an intial board
-     * @param initalBoard
-     * @param depth Current depth from initial board
-     * @return
-     */
-    private ArrayList<Board> dlfs(Board initalBoard, int depth) {
-        ArrayList<Board> possibleBoards = new ArrayList<>();
-
-        //Base case for bottom of search
-        if (depth > l) return possibleBoards;
-
-        Stack<Board> fringe = new Stack<>();
-        fringe.addAll(getFutureBoards(initalBoard));
-        while (!fringe.isEmpty()) {
-            if (timedout) {
-                break;
-            }
-
-            Board board = fringe.pop();
-
-            ArrayList<Board> futureBoards = getFutureBoards(board);
-            //Adds a board if it is an end node
-            if (depth == l || futureBoards.isEmpty()) {
-                possibleBoards.add(board);
-            }
-            possibleBoards.addAll(dlfs(board, depth + 1));
+                boardsSavedForLayer.push(wBoards);
+            } 
         }
 
-        //Base case for empty fringe
-        return possibleBoards;
+        cancelAndResetClock();
+        System.out.println("No solution found");
+        if (verbosity >= 1) {
+            System.out.println(mySpecialBoard);
+        } 
+        //Would normally return null, but we are choosing to return the best that we found from a run
+        return mySpecialBoard;
     }
 
     /**
@@ -246,7 +302,6 @@ public class BeamStack extends Timeout {
             Board newBoard = board.deepCopy();
             newBoard.addToPath(pair[0], pair[1]);
             newBoard.removeTiles(pair[0], pair[1]);
-            numberOfNodesSearched++;
 
             futureBoards.add(newBoard);
         }
