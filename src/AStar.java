@@ -6,7 +6,7 @@ import java.util.Collections;
 
 public class AStar {
 
-    public ArrayList<Tile[]> runInstance(Board startingNode){
+    public Board runInstance(Board startingNode){
         return runInstance(startingNode, 1);
     }
     
@@ -19,7 +19,7 @@ public class AStar {
      *                      2 = Initial board && final board
      *                      3 = Initial board && each set of tiles removed in order && final board
      */
-    public ArrayList<Tile[]> runInstance(Board startingNode, int verbosity){
+    public Board runInstance(Board startingNode, int verbosity){
         float startTime = System.currentTimeMillis();
         System.out.printf("Start Time: %.02f ms\n", startTime);
 
@@ -60,12 +60,16 @@ public class AStar {
                 // Print ending board
                 System.out.println("\nFinal board searched -> this board is the goal state.");
                 System.out.println(searchNode);
-                System.out.println("\nPath to this board: " + searchNode.getPath());
+                System.out.println("\nPath to this board: ");
+                ArrayList<Tile[]> currentNodePath = searchNode.getPath();
+                for(Tile[] tilePair : currentNodePath){
+                    System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
+                }
                 float endTime = System.currentTimeMillis();
                 System.out.printf("Time taken: %.02f ms\n", (endTime-startTime));
 
                 // 5. return searchNode
-                return (searchNode.getPath());
+                return (searchNode);
             }
                 
             // 6. closedList.add(searchNode.endingState)
@@ -98,10 +102,13 @@ public class AStar {
 
         System.out.println("\nFinal board searched -> no more moves remaining and goal state is unreachable.");
         System.out.println(lastSearchedBoard);
-        System.out.println("\nPath to this board: " + lastSearchedBoard.getPath());
-        float endTime = System.currentTimeMillis();
-        System.out.printf("Time taken: %.02f ms\n", (endTime-startTime));
-        return lastSearchedBoard.getPath();
+        System.out.println("\nPath to this board: ");
+        ArrayList<Tile[]> currentNodePath = lastSearchedBoard.getPath();
+        for(Tile[] tilePair : currentNodePath){
+            System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
+        }        float endTime = System.currentTimeMillis();
+        System.out.printf("\nTime taken: %.02f ms\n", (endTime-startTime));
+        return lastSearchedBoard;
     }
 
     // Checks if given board is already in the given list

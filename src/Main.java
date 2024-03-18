@@ -8,13 +8,14 @@ public class Main{
     public static void main(String[] args) {
         // Can create Boards of type "classic", "pyramid", and "fish"
         Board classicBoard = new Board(238493280, "classic");
-
-        // AStar aStar = new AStar();
-        // System.out.print(aStar.runInstance(classicBoard, 1));
     
 
         BeamStack algorithm2 = new BeamStack(2, 2);
-        System.out.println(algorithm2.runInstance(classicBoard, 1));
+        Board aStarStart = algorithm2.runInstance(classicBoard, 1);
+        System.out.print(aStarStart);
+
+        AStar aStar = new AStar();
+        System.out.print(aStar.runInstance(aStarStart, 1));
     }
     
     public static Board recordRuntime(Supplier<Board> function) {
