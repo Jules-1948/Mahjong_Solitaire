@@ -15,24 +15,24 @@ public class AStar {
      * Numbered comments (Ex. 5. return searchNode) are directly from pseudocode
      * Runs A* algorithm on one instance of a Classic Board shape and prints results according to verbosity setting
      * @param verbosity - sets degree of console output 
-     *                      1 = Final result 
-     *                      2 = Initial board && final board
-     *                      3 = Initial board && each set of tiles removed in order && final board
+     *                      1 = Final board 
+     *                      2 = Initial board, running total of numNodesSearched, & final board
+     *                      3 = Initial board, each set of tiles removed in order, running total of numNodesSearched, & final board
      */
     public Board runInstance(Board startingNode, int verbosity){
-        float startTime = System.currentTimeMillis();
-        System.out.printf("Start Time: %.02f ms\n", startTime);
-
         // Print starting board
-        if(verbosity == 2 || verbosity == 3){
+        if(verbosity >= 2){
             System.out.println("\nStarting board -> No tiles removed yet.");
             System.out.println(startingNode);
         }
+
+        // Initialize variables for verbosity and analysis
+        Board lastSearchedBoard = startingNode; //used to print last board at the end when verbosity == 2 or 3
+        long numNodesSearched = 0;
         
         // 1. Initialize fringe to starting state, closed list to empty
         ArrayList<Board> fringe = new ArrayList<Board>();
         ArrayList<Board> closedList = new ArrayList<Board>();
-        Board lastSearchedBoard = startingNode; //used to print last board at the end when verbosity == 2 or 3
         fringe.add(startingNode);
 
         // 2. While fringe is not empty:
@@ -40,14 +40,15 @@ public class AStar {
             // 3. searchNode <- fringe.removeFirst()
             Board searchNode = fringe.get(0);
             fringe.remove(0);
+            numNodesSearched++;
             lastSearchedBoard = searchNode;
 
             // print path to searchNode
-            if(verbosity == 2){
+            if(verbosity >= 2){
+                System.out.println("\nnumNodesSearched: " + numNodesSearched);
+            }
+            if(verbosity >= 3){
                 ArrayList<Tile[]> currentNodePath = searchNode.getPath();
-                if(currentNodePath.isEmpty()){
-                    System.out.println("\nBelow lists the path of removed tiles from each searchNode");
-                }
                 System.out.print("\nRemaining tiles: " + searchNode.getExistentTileCount());
                 for(Tile[] tilePair : currentNodePath){
                     System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
@@ -58,15 +59,15 @@ public class AStar {
             // 4. if isGoal(searchNode.endingState):
             if(searchNode.getExistentTileCount() == 0){
                 // Print ending board
-                System.out.println("\nFinal board searched -> this board is the goal state.");
-                System.out.println(searchNode);
-                System.out.println("\nPath to this board: ");
-                ArrayList<Tile[]> currentNodePath = searchNode.getPath();
-                for(Tile[] tilePair : currentNodePath){
-                    System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
+                if(verbosity >= 1){
+                    System.out.println("\nFinal board searched -> this board is the goal state.");
+                    System.out.println(searchNode);
+                    System.out.println("\nPath to this board: ");
+                    ArrayList<Tile[]> currentNodePath = lastSearchedBoard.getPath();
+                    for(Tile[] tilePair : currentNodePath){
+                        System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
+                    } 
                 }
-                float endTime = System.currentTimeMillis();
-                System.out.printf("Time taken: %.02f ms\n", (endTime-startTime));
 
                 // 5. return searchNode
                 return (searchNode);
@@ -100,14 +101,16 @@ public class AStar {
             Collections.sort(fringe);
         }
 
-        System.out.println("\nFinal board searched -> no more moves remaining and goal state is unreachable.");
-        System.out.println(lastSearchedBoard);
-        System.out.println("\nPath to this board: ");
-        ArrayList<Tile[]> currentNodePath = lastSearchedBoard.getPath();
-        for(Tile[] tilePair : currentNodePath){
-            System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
-        }        float endTime = System.currentTimeMillis();
-        System.out.printf("\nTime taken: %.02f ms\n", (endTime-startTime));
+        if(verbosity >= 1){
+            System.out.println("\nFinal board searched -> no more moves remaining and goal state is unreachable.");
+            System.out.println(lastSearchedBoard);
+            System.out.println("\nPath to this board: ");
+            ArrayList<Tile[]> currentNodePath = lastSearchedBoard.getPath();
+            for(Tile[] tilePair : currentNodePath){
+                System.out.print(" " + tilePair[0].toString() + tilePair[1].toString());
+            } 
+        }
+
         return lastSearchedBoard;
     }
 

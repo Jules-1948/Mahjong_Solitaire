@@ -99,6 +99,79 @@ public class BeamStack {
         return boards[0];
     }
 
+
+    /**
+     * Runs Beam Stack search on the instance
+     * @param startingBoard
+     * @param verbosity How much printing should be done while running, on a scale of 1-3
+     * @return a smaller (partially completed) board for AStar to run on
+     */
+    public Board getSmallerBoard(Board startingBoard, int verbosity){
+        System.out.println("\nGenerating a smaller board...");
+        //Stores a board for each of the paths being expanded
+        Board[] boards = new Board[w];
+        Board mySpecialBoard = startingBoard;
+        int count = 0;
+
+
+        //Initalizes fringe with possible values of starting board
+        ArrayList<Board> fringe = getFutureBoards(startingBoard);
+        while(!fringe.isEmpty()) {
+            // Sort the board
+            Collections.sort(fringe);
+            
+            //Save w best new board nodes
+            for (int i = 0; i < w; i++) {
+                try {
+                    //Get best board from fringe
+                    Board bestBoard = fringe.remove(0);
+
+                    //Check to see if it would find a goal state and return if so
+                    if (bestBoard.getExistentTileCount() == 0) {
+                        return bestBoard;
+                    }
+
+                    //Print verbage
+                    if (verbosity >= 2) {
+                        System.out.println("Best board[i] where i = " + i);
+                        System.out.println("Boards overall depth is: " + bestBoard.getDepth());
+                        System.out.println("Remaining tile count: " + bestBoard.getExistentTileCount());
+                    }
+                    if (verbosity >= 3) {
+                        System.out.println(bestBoard);
+                    }
+
+                    //Save the board for future reference
+                    boards[i] = bestBoard;
+                } catch(Exception e) {
+                    if (verbosity >= 1) {
+                        System.out.println(e);
+                    }
+                } 
+            }
+
+            if (count % 20 == 0) {
+                mySpecialBoard = boards[0].deepCopy();
+            }
+            count++;
+            //Clear the list to add new next moves
+            fringe.clear();
+
+            for (Board board: boards) {
+                //For each board, add possible next moves to fringe utilizing dfs
+                ArrayList<Board> futureBoards = dfs(board, 0);
+                
+                //Print verbage
+                if (verbosity >= 1) {
+                    System.out.println("Future board choices return size: " + futureBoards.size());
+                }
+                fringe.addAll(futureBoards);
+            }
+        } 
+
+        return mySpecialBoard;
+    }
+
     /**
      * Runs depth first search up to the depth limit for an intial board
      * @param initalBoard
