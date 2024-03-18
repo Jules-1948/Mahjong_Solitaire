@@ -5,12 +5,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class AStar extends Timeout {
-    private long numberOfNodesSearched = 0;
+    private long numberOfNodesSearched = 0; //Total number of search nodes explored for the run
 
+    /**
+     * Constructor for A* algorithm
+     */
     public AStar() {
         super(0);
     }
 
+    /**
+     * Constructor for A* algorithm with timeout
+     * @param timeout The time the program should wait before timing out and returning its result
+     */
     public AStar(long timeout) {
         super(timeout);
     }
@@ -29,6 +36,7 @@ public class AStar extends Timeout {
      *                      3 = Initial board, each set of tiles removed in order, running total of numNodesSearched, & final board
      */
     public Board runInstance(Board startingNode, int verbosity){
+        //Starts the timeout clock
         if (timeout > 0) {
             startTimeoutClock();
         }
@@ -50,9 +58,11 @@ public class AStar extends Timeout {
 
         // 2. While fringe is not empty:
         while(!fringe.isEmpty()){
+            //Checks if should stop running
             if (timedout) {
                 break;
             }
+            
             // 3. searchNode <- fringe.removeFirst()
             Board searchNode = fringe.get(0);
             fringe.remove(0);
@@ -127,6 +137,7 @@ public class AStar extends Timeout {
             } 
         }
 
+        //Resets the clock and returns the lastSearchedBoard
         cancelAndResetClock();
         return lastSearchedBoard;
     }
@@ -175,6 +186,10 @@ public class AStar extends Timeout {
         return tilePairs;
     }
 
+    /**
+     * Gets the number of nodes searched for the last run of search
+     * @return
+     */
     public long getNodesSearched() {
         return numberOfNodesSearched;
     }

@@ -104,14 +104,20 @@ public class BeamStack extends Timeout {
             fringe.clear();
 
             for (Board board: boards) {
-                //For each board, add possible next moves to fringe utilizing dfs
-                ArrayList<Board> futureBoards = dfs(board, 0);
-                
-                //Print verbage
-                if (verbosity >= 1) {
-                    System.out.println("Future board choices return size: " + futureBoards.size());
+                try {
+                    //For each board, add possible next moves to fringe utilizing dfs
+                    ArrayList<Board> futureBoards = dfs(board, 0);
+                    
+                    //Print verbage
+                    if (verbosity >= 1) {
+                        System.out.println("Future board choices return size: " + futureBoards.size());
+                    }
+                    fringe.addAll(futureBoards);
+                } catch(Exception e) {
+                    if (verbosity >= 1) {
+                        System.out.println(e);
+                    }
                 }
-                fringe.addAll(futureBoards);
             }
         } 
 
@@ -271,6 +277,10 @@ public class BeamStack extends Timeout {
         return tilePairs; 
     }
 
+    /**
+     * Gets the number of nodes searched for the last run of search
+     * @return
+     */
     public long getNodesSearched() {
         return numberOfNodesSearched;
     }
