@@ -280,6 +280,10 @@ public class Board implements Comparable<Board> {
         return new Board(this);
     }
  
+    public int getTotalTileCount() {
+        return totalTileCount;
+    }
+
     @Override
     // Overrides Comparable<Board> to sort Boards based on Heuristics
     // Collections.sort() sorts lists in ascending order

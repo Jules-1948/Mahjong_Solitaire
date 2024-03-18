@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Stack;
 
 /**
  * @author Tyler James
@@ -16,9 +18,11 @@ public class BeamStack {
     // Your comments should note the connections between the code and the pseudocode, like “This block
     // implements finding the best nodes in the open list (line 1 of the pseudocode)”.
     private int w;
+    private int l;
 
-    public BeamStack(int w) {
+    public BeamStack(int w, int l) {
         this.w = w;
+        this.l = l;
     }
 
     public Board runInstance(Board startingBoard, int verbosity){
@@ -26,95 +30,103 @@ public class BeamStack {
         Board[] boards = new Board[w];
 
         //Initalizes openList with possible values
-        ArrayList<Pair> openList = getRemovableTilePairs(startingBoard);
-        printBoardVerbage(startingBoard, verbosity);
-        while(!openList.isEmpty()) {
-            // Get best pair, remove it from its board, and then save its board to be expanded later
+        ArrayList<Board> fringe = getFutureBoards(startingBoard);
+        // printBoardVerbage(startingBoard, verbosity);
+        while(!fringe.isEmpty()) {
+            // Get best board, remove it from its board, and then save its board to be expanded later
+            Collections.sort(fringe);
             for (int i = 0; i < w; i++) {
                 try {
-                    //Get best pair from openList
-                    Pair bestPair = getBestPair(openList);
-                    openList.remove(bestPair);
-
-                    //Apply move to the pair's board
-                    Board newBoard = bestPair.getBoard().deepCopy();
-                    printBoardVerbage(newBoard, verbosity);
-                    newBoard.addToPath(bestPair.getEntry1(), bestPair.getEntry2());
-                    newBoard.removeTiles(bestPair.getEntry1(), bestPair.getEntry2());
+                    //Get best board from openList
+                    Board bestBoard = fringe.remove(0);
 
                     //Check to see if it would cause a success
-                    if (newBoard.getExistentTileCount() == 0) {
-                        return newBoard;
+                    if (bestBoard.getExistentTileCount() == 0) {
+                        return bestBoard;
                     }
 
                     //Save the board for future reference
-                    boards[i] = newBoard;
+                    boards[i] = bestBoard;
                 } catch(Exception e) {
-                    // System.out.println(e);
+                    if (verbosity >= 1) {
+                        System.out.println(e);
+                    }
                 } 
             }
 
             //Clear the list to add new Pair choices for the new boards
-            openList.clear();
+            fringe.clear();
 
             for (Board board: boards) {
-                //For each board add possible next moves to open list
-                ArrayList<Pair> removableTilePairs = getRemovableTilePairs(board);
-                openList.addAll(removableTilePairs);
+                //For each board add possible next moves to openList utilizing dfs
+                ArrayList<Board> futureBoards = dfs(board, 0);
+                System.out.println("future Boards return size: " + futureBoards.size());
+                fringe.addAll(futureBoards);
             }
         } 
 
+        // if (verbosity >= 1) {
+        //     System.out.println("A soultion was found!");
+        // }
+        // printBoardVerbage(startingBoard, verbosity);
         return boards[0];
     }
 
-    private ArrayList<Pair> getRemovableTilePairs(Board board) {
+    private ArrayList<Board> dfs(Board initalBoard, int depth) {
+        ArrayList<Board> possibleBoards = new ArrayList<>();
+
+        //Base case for bottom of search
+        if (depth > l) return possibleBoards;
+
+        Stack<Board> fringe = new Stack<>();
+        fringe.addAll(getFutureBoards(initalBoard));
+        while (!fringe.isEmpty()) {
+            Board board = fringe.pop();
+
+            ArrayList<Board> futureBoards = getFutureBoards(board);
+            // System.out.println("Board fringe size: " + fringe.size());
+            //Adds a board if it is an end node
+            if (depth == l || futureBoards.isEmpty()) {
+                possibleBoards.add(board);
+            }
+            possibleBoards.addAll(dfs(board, depth + 1));
+        }
+
+        //Base case for empty fringe
+        return possibleBoards;
+    }
+
+    private ArrayList<Board> getFutureBoards(Board board) {
+        ArrayList<Board> futureBoards = new ArrayList<>();
+
+        for (Tile[] pair: getRemovablePairs(board)) {
+            Board newBoard = board.deepCopy();
+            newBoard.addToPath(pair[0], pair[1]);
+            newBoard.removeTiles(pair[0], pair[1]);
+
+            futureBoards.add(newBoard);
+        }
+
+        return futureBoards;
+    }
+
+    private ArrayList<Tile[]> getRemovablePairs(Board board) {
         ArrayList<Tile> exposedTiles = board.getExposedTiles();
         
-        ArrayList<Pair> tilePairs = new ArrayList<>();
+        ArrayList<Tile[]> tilePairs = new ArrayList<>();
         for(int i = 0; i < exposedTiles.size(); i++){
             for(int j = i + 1; j < exposedTiles.size(); j++ ){
                 Tile tile1 = exposedTiles.get(i);
                 Tile tile2 = exposedTiles.get(j);
                 if(board.canRemoveTiles(tile1, tile2)){
-                    tilePairs.add(new Pair(tile1, tile2, board));
+                    Tile[] pair = {tile1, tile2};
+                    tilePairs.add(pair);
                 }
             }
         }
 
-        return tilePairs;
+        return tilePairs; 
     }
-
-    private Pair getBestPair(ArrayList<Pair> pairs) {
-        Pair pair1 = pairs.get(0);
-
-        for (Pair pair2: pairs){
-            if (getPairScore(pair2) > getPairScore(pair1)) {
-                pair1 = pair2;
-            }
-        }
-
-        return pair1;
-    }
-
-    //This is the heuristic for this beam search
-    private int getPairScore(Pair pair) {
-        int tile1Score = 0;
-        int tile2Score = 0;
-
-        tile1Score += pair.getEntry1().getZLayer();
-        tile2Score += pair.getEntry1().getZLayer();
-
-        if (pair.getEntry1().getSuit() == 5 || pair.getEntry1().getSuit() == 6) {
-            tile1Score += 2;
-        }
-        if (pair.getEntry2().getSuit() == 5 || pair.getEntry2().getSuit() == 6) {
-            tile2Score += 2;
-        }
-
-        return tile1Score + tile2Score;
-    }
-
-    
 
     private void printBoardVerbage(Board board, int verbosity) {
         if (verbosity != 0) {
@@ -123,7 +135,7 @@ public class BeamStack {
                 System.out.println("Its path length is " + board.getPath().size());
             }
             if (verbosity >= 2) {
-                System.out.println("Its current depth is " + board.getDepth());
+                System.out.println("Its current board depth is " + board.getDepth());
                 System.out.println("Its current remaining tile count is " + board.getExistentTileCount());
             }
             if (verbosity >= 3) {
