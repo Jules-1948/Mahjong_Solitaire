@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Board {
+public class Board implements Comparable<Board> {
     // Board Variables
     final private int numDimensions = 3; // width, length, depth -- used only in contructor
     private String boardType;
@@ -252,7 +252,7 @@ public class Board {
     // prints current game board layer by layer
     @Override
     public String toString(){
-        String boardString = "\n\n";
+        String boardString = "";
 
         for(int z=0; z<boardZ; z++){
             boardString = boardString + "Layer " + z + "\n";
@@ -279,12 +279,31 @@ public class Board {
     public Board deepCopy() {
         return new Board(this);
     }
+ 
+    @Override
+    // Overrides Comparable<Board> to sort Boards based on Heuristics
+    // Collections.sort() sorts lists in ascending order
+    public int compareTo(Board board){
+        // Heuristics: 1. Depth -> the fewer layers, the better
+        //             2. exposedTileCount -> the more exposed tiles, the better
+        if(this.getDepth() < board.getDepth()){
+            return -2;
+        } else if(this.getDepth() > board.getDepth()){
+            return 2;
+        } else {
+            if(this.getExposedTiles().size() > board.getExposedTiles().size()){
+                return -1;
+            } else if(this.getExposedTiles().size() < board.getExposedTiles().size()){
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
 
 
 
-
-
-    //Below are all private helper functions mostly to create the board instance
+    //Below are all private helper functions mostly to create the initial Board
 
 
 
