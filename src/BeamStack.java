@@ -10,6 +10,7 @@ import java.util.Stack;
 public class BeamStack {
     private int w; //The width of the beam
     private int l; //The search depth that should be checked to find new canidate nodes
+    private int numberOfNodesSearched = 0;
 
     /**
      * Creates a beam stack search
@@ -38,6 +39,8 @@ public class BeamStack {
     public Board runInstance(Board startingBoard, int verbosity){
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
+        //Sets starting value to 0
+        numberOfNodesSearched = 0;
 
         //Initalizes fringe with possible values of starting board
         ArrayList<Board> fringe = getFutureBoards(startingBoard);
@@ -92,7 +95,7 @@ public class BeamStack {
 
         if (verbosity >= 1) {
             System.out.println(boards[0]);
-        }
+        } 
         return boards[0];
     }
 
@@ -137,6 +140,7 @@ public class BeamStack {
             Board newBoard = board.deepCopy();
             newBoard.addToPath(pair[0], pair[1]);
             newBoard.removeTiles(pair[0], pair[1]);
+            numberOfNodesSearched++;
 
             futureBoards.add(newBoard);
         }
@@ -165,5 +169,9 @@ public class BeamStack {
         }
 
         return tilePairs; 
+    }
+
+    public int getNodesSearched() {
+        return numberOfNodesSearched;
     }
 }
