@@ -4,50 +4,66 @@ import java.util.Stack;
 
 /**
  * @author Tyler James
- * https://www.geeksforgeeks.org/introduction-to-beam-search-algorithm/
+ * Beam Stack Search
+ * Pseudo code came from: https://www.geeksforgeeks.org/introduction-to-beam-search-algorithm/
  */
 public class BeamStack {
+    private int w; //The width of the beam
+    private int l; //The search depth that should be checked to find new canidate nodes
 
-    // Your solver method or class should have a single verbosity parameter that defaults to showing the final result
-    // only but can be set to another value (or values) to print out more details about the steps the algorithm is taking.
-    // For example, for verbosity=1, my CSP solver might print out every time it tries to assign a value to a variable, and
-    // with verbosity=2, it prints out each domain of the variables in addition.
-
-    // Comment the algorithm code liberally. Include a link to the paper or reference you used for the pseudocode of
-    // the algorithm e.g., “Used pseudocode from Figure 1 of https://cdn.aaai.org/ICAPS/2005/ICAPS05-010.pdf”).
-    // Your comments should note the connections between the code and the pseudocode, like “This block
-    // implements finding the best nodes in the open list (line 1 of the pseudocode)”.
-    private int w;
-    private int l;
-
+    /**
+     * Creates a beam stack search
+     * @param w The width of the beam
+     * @param l The search depth that should be checked to find new canidate nodes
+     */
     public BeamStack(int w, int l) {
         this.w = w;
         this.l = l;
     }
 
+    /**
+     * Runs Beam Stack search on the instance
+     * @param startingBoard
+     * @return
+     */
     public Board runInstance(Board startingBoard) {
         return runInstance(startingBoard, 1);
     }
-
+    /**
+     * Runs Beam Stack search on the instance
+     * @param startingBoard
+     * @param verbosity How much printing should be done while running, on a scale of 1-3
+     * @return
+     */
     public Board runInstance(Board startingBoard, int verbosity){
         //Stores a board for each of the paths being expanded
         Board[] boards = new Board[w];
-        Board mySpecialBoard = startingBoard;
-        int count = 0;
 
-        //Initalizes openList with possible values
+        //Initalizes fringe with possible values of starting board
         ArrayList<Board> fringe = getFutureBoards(startingBoard);
         while(!fringe.isEmpty()) {
-            // Get best board, remove it from its board, and then save its board to be expanded later
+            // Sort the board
             Collections.sort(fringe);
+            
+            //Save w best new board nodes
             for (int i = 0; i < w; i++) {
                 try {
-                    //Get best board from openList
+                    //Get best board from fringe
                     Board bestBoard = fringe.remove(0);
 
-                    //Check to see if it would cause a success
+                    //Check to see if it would find a goal state and return if so
                     if (bestBoard.getExistentTileCount() == 0) {
                         return bestBoard;
+                    }
+
+                    //Print verbage
+                    if (verbosity >= 2) {
+                        System.out.println("Best board[i] where i = " + i);
+                        System.out.println("Boards overall depth is: " + bestBoard.getDepth());
+                        System.out.println("Remaining tile count: " + bestBoard.getExistentTileCount());
+                    }
+                    if (verbosity >= 3) {
+                        System.out.println(bestBoard);
                     }
 
                     //Save the board for future reference
@@ -59,31 +75,33 @@ public class BeamStack {
                 } 
             }
 
-            // mySpecialBoard = boards[0].deepCopy();
-            // System.out.println(count);
-            if (count % 10 == 0) {
-                mySpecialBoard = boards[0].deepCopy();
-                System.out.println(mySpecialBoard);
-            }
-            count++;
             //Clear the list to add new next moves
             fringe.clear();
 
             for (Board board: boards) {
-                //For each board add possible next moves to openList utilizing dfs
+                //For each board, add possible next moves to fringe utilizing dfs
                 ArrayList<Board> futureBoards = dfs(board, 0);
-                System.out.println("future Boards return size: " + futureBoards.size());
+                
+                //Print verbage
+                if (verbosity >= 1) {
+                    System.out.println("Future board choices return size: " + futureBoards.size());
+                }
                 fringe.addAll(futureBoards);
             }
         } 
 
-        
-        System.out.println(mySpecialBoard);
-        return mySpecialBoard;
-
-        // return boards[0];
+        if (verbosity >= 1) {
+            System.out.println(boards[0]);
+        }
+        return boards[0];
     }
 
+    /**
+     * Runs depth first search up to the depth limit for an intial board
+     * @param initalBoard
+     * @param depth Current depth from initial board
+     * @return
+     */
     private ArrayList<Board> dfs(Board initalBoard, int depth) {
         ArrayList<Board> possibleBoards = new ArrayList<>();
 
@@ -107,6 +125,11 @@ public class BeamStack {
         return possibleBoards;
     }
 
+    /**
+     * Gets the possible future states for a board
+     * @param board
+     * @return
+     */
     private ArrayList<Board> getFutureBoards(Board board) {
         ArrayList<Board> futureBoards = new ArrayList<>();
 
@@ -121,6 +144,11 @@ public class BeamStack {
         return futureBoards;
     }
 
+    /**
+     * Finds the combinations of pairs that can be removed from a board
+     * @param board
+     * @return
+     */
     private ArrayList<Tile[]> getRemovablePairs(Board board) {
         ArrayList<Tile> exposedTiles = board.getExposedTiles();
         
