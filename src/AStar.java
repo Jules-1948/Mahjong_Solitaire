@@ -31,12 +31,18 @@ public class AStar {
         Board lastSearchedBoard = startingNode; //used to print last board at the end when verbosity == 2 or 3
         fringe.add(startingNode);
 
+        int lastremainingtiles = -1;
+
         // 2. While fringe is not empty:
         while(!fringe.isEmpty()){
             // 3. searchNode <- fringe.removeFirst()
-            Board searchNode = fringe.get(0);
-            fringe.remove(0);
+            Board searchNode = fringe.remove(0);
             lastSearchedBoard = searchNode;
+
+            if(searchNode.getExistentTileCount() != lastremainingtiles){
+                System.out.print("\nRemaining tiles: " + searchNode.getExistentTileCount());
+                lastremainingtiles = searchNode.getExistentTileCount();                
+            }
 
             // print path to searchNode
             if(verbosity == 2){
