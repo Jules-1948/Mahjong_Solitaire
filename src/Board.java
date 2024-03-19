@@ -49,12 +49,41 @@ public class Board implements Comparable<Board> {
             boardX = 24;
             boardY = 16;
             boardZ = 3;
+        } else if (boardType.toLowerCase().equals("mini")) {
+            this.boardType = "mini";
+            boardX = 34;
+            boardY = 14;
+            boardZ = 7;
+
+            board = new Tile[boardX][boardY][boardZ];
+            existentTileCount = 0;
+            boardTileSpaces = new int[totalTileCount][numDimensions];
+            tiles = new ArrayList<>();
+            path = new ArrayList<>();
+
+            initializeTileSpaces();
+
+            createNewTile(boardTileSpaces[0], 1, 1);
+            createNewTile(boardTileSpaces[1], 2, 1);
+            createNewTile(boardTileSpaces[2], 2, 1);
+            createNewTile(boardTileSpaces[3], 5, 5);
+            createNewTile(boardTileSpaces[4], 1, 1);
+            createNewTile(boardTileSpaces[5], 1, 2);
+            createNewTile(boardTileSpaces[6], 1, 4);
+            createNewTile(boardTileSpaces[7], 5, 5);
+            createNewTile(boardTileSpaces[8], 1, 3);
+            createNewTile(boardTileSpaces[9], 3, 3);
+            createNewTile(boardTileSpaces[10], 1, 3);
+            createNewTile(boardTileSpaces[11], 1, 2);
+            createNewTile(boardTileSpaces[12], 1, 4);
+            createNewTile(boardTileSpaces[13], 3, 3);
+            return;
         } else{
             this.boardType = "classic";
             boardX = 30;
             boardY = 16;
             boardZ = 5;
-        }
+        } 
 
         // Initialize values according to static rules, suit counts, and face counts of the game
         board = new Tile[boardX][boardY][boardZ];
@@ -370,9 +399,11 @@ public class Board implements Comparable<Board> {
                 locationInput = new File("src\\BoardTileLocations\\PyramidBoard.txt");
             } else if(boardType.equals("fish")){
                 locationInput = new File("src\\BoardTileLocations\\FishBoard.txt");
-            }else{
+            } else if(boardType.equals("mini")) {
+                locationInput = new File("src\\BoardTileLocations\\Mini.txt");
+            } else{
                 locationInput = new File("src\\BoardTileLocations\\ClassicBoard.txt");
-            }
+            } 
             Scanner spaceScnr = new Scanner(locationInput);
 
             int readLoctions = 0;
