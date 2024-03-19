@@ -5,7 +5,7 @@ import java.util.Stack;
 /**
  * @author Tyler James
  * Beam Stack Search
- * Pseudo code came from: https://www.geeksforgeeks.org/introduction-to-beam-search-algorithm/
+ * Pseudo code came from: https://cdn.aaai.org/ICAPS/2005/ICAPS05-010.pdf
  */
 public class BeamStack extends Timeout {
     private int w; //The width of the beam
@@ -62,13 +62,16 @@ public class BeamStack extends Timeout {
         int worstScore = -1;
         //Initalizes fringe with possible values of starting board
         while(!boardsSavedForLayer.isEmpty()) {
+            //Verbage
             if (verbosity >= 1) {
                 System.out.println("Stack Size: " + boardsSavedForLayer.size());
             }
-            Board[] layersBoards = boardsSavedForLayer.peek();
+            //Breaks the loop if it runs too long
             if (timedout) {
                 break;
             }
+            //Gets top layers nodes/boards
+            Board[] layersBoards = boardsSavedForLayer.peek();
             
             //Create fringe and add next possible board states
             ArrayList<Board> fringe = new ArrayList<>();
@@ -76,14 +79,18 @@ public class BeamStack extends Timeout {
                 if (layersBoards[i] != null) {
                     ArrayList<Board> futureBoards = getFutureBoards(layersBoards[i]);
                     int tempWorstScore = worstScore;
+                    //Only adds future board states that havent been previously checked
                     futureBoards.removeIf(board -> scoreBoard(board) <= tempWorstScore);
                     fringe.addAll(futureBoards);
                 }
             }
+
+            //Verage
             if (verbosity >= 2) {
                 System.out.println("Fringe size: " + fringe.size());
             }
             
+            //Base case, if fringe is empty then must be bad nodes, so back up a step in search
             if (fringe.isEmpty()) {
                 worstScore = getHighestScoredBoard(boardsSavedForLayer.pop());
                 continue;
@@ -132,6 +139,7 @@ public class BeamStack extends Timeout {
                     }
                 } 
             } 
+            //Add new saved layer to stack
             boardsSavedForLayer.push(wBoards);
         }
 
@@ -144,6 +152,11 @@ public class BeamStack extends Timeout {
         return bestBoardFoundDuringRun;
     }
 
+    /**
+     * Checks to see if all of the vaues in boards is null
+     * @param boards
+     * @return
+     */
     private boolean checkIfAllNull(Board[] boards) {
         for (Board board: boards) {
             if (board != null) {
@@ -153,6 +166,12 @@ public class BeamStack extends Timeout {
         return true;
     }
 
+    /**
+     * Returns a score heuristic for the algorithm
+     * Note: This is a relatively simple scoring system but it proved to be the most acurate
+     * @param board
+     * @return
+     */
     private int scoreBoard(Board board) {
         int score = 0;
         score += getRemovablePairs(board).size();
@@ -160,6 +179,11 @@ public class BeamStack extends Timeout {
         return score;
     }
 
+    /**
+     * Returns the highest board score (which is the worst board)
+     * @param boards
+     * @return
+     */
     private int getHighestScoredBoard(Board[] boards) {
         Board highestScoreBoard = boards[0];
         if (highestScoreBoard == null) {
