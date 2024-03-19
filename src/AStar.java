@@ -1,5 +1,6 @@
 /**
  * @author Julia Schaming
+ * Pseudocode referenced from 03_AStarExample Slide from class
  */
 import java.util.ArrayList;
 import java.util.Collections;
